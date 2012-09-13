@@ -30,17 +30,20 @@ def list_all_actions():
 def main(argv):
     '''
     '''
-    if argv:
-        actions = list_all_actions()
-        if argv[0] not in actions:
-            print '\tUnknown command "{0}"'.format(argv[0])
-            print '\t please try'
-            for action in actions:
-                print '\t\t',action
-            exit(1)
+    try:
+        if argv:
+            actions = list_all_actions()
+            if argv[0] not in actions:
+                print '\tUnknown command "{0}"'.format(argv[0])
+                print '\t please try'
+                for action in actions:
+                    print '\t\t',action
+                exit(1)
 
-        else:
-            actions[argv[0]].main(argv[1:])
+            else:
+                actions[argv[0]].main(argv[1:])
+    except Exception as e:
+        print type(e), str(e)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
