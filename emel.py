@@ -3,6 +3,17 @@ import imp
 from glob import glob
 import re
 import os
+import inspect
+
+
+def trace_errors(e):
+    print '{0} {1}'.format(type(e), str(e))
+    for i in inspect.trace()[1:]:
+        frameInfo = inspect.getframeinfo(i[0])
+        #print frameInfo
+        print '\t"{1}": {0}'.format(frameInfo.lineno,frameInfo.filename)
+        print '\t\t({0})'.format(', '.join([ c.strip() for c in frameInfo.code_context ]))
+        
 
 def list_all_actions():
     allActions = {}
@@ -21,11 +32,11 @@ def list_all_actions():
             allActions[moduleName] = currModule
 
         except Exception as e:
-            print 'Emel failed with errors:'
-            print '{0} {1}'.format(type(e), str(e))
+            trace_errors(e)
             exit(1)
     
     return allActions
+
 
 def main(argv):
     '''
@@ -43,7 +54,7 @@ def main(argv):
             else:
                 actions[argv[0]].main(argv[1:])
     except Exception as e:
-        print type(e), str(e)
+        trace_errors(e)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
