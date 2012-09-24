@@ -8,7 +8,7 @@ from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
 from emel_globals import EMEL_CONFIG_FILE, Data
-
+from emel.status import check_directory_status
 
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -25,11 +25,12 @@ def __scan_directory__(location, addCurrent=True):
     '''
     config = __validate_config__()
     location = os.getcwd() if not location else location
-    print 'Scanning', location, '...'
+    print 'Scanning', location, '...',
     files = [ root for root, _, files in os.walk(location) if Data.MARKER in files ]
     untracked = [ f for f in files if f not in config[Data.SECTION][Data.ALL] ]
 
-    print 'Found (', len(untracked), ') untracked folders.'
+    print 'Done.\n'
+    print 'Found (', len(untracked), ') untracked folders.\n'
     if untracked:
         [ config[Data.SECTION][Data.ALL].append(f) for f in untracked ]
         if not config[Data.SECTION][Data.CURRENT] and addCurrent:
@@ -44,6 +45,7 @@ def __create_directory__(location, setAsCurrent=True, create=True, islocation=Tr
     Sets the location of the data directory in the emel.config file.
     '''
     config = __validate_config__()
+    location = os.getcwd() if not location else location
     current = create_path([location, 'Data']) if islocation else location
     if create: 
         print 'Attempting to create', current
@@ -106,7 +108,7 @@ def setup_arg_parser():
     '''
     parser = argparse.ArgumentParser(description='This module sets the location of the emel Data directory.')
 
-    parser.add_argument('-n', '--new', action='store',  
+    parser.add_argument('-n', '--new', action='store', nargs='*',  
                     dest='new', default=os.getcwd(), help='Sets the location of the data directory. If not given, data will use the current working directory')
     parser.add_argument('-rm', '--remove', action='store_true', 
                     dest='remove', help='Removes the data directory from the config file. This will NOT delete the data directory.')
@@ -125,17 +127,21 @@ def main(argv):
     parser = setup_arg_parser()
     options = parser.parse_args(argv)
 
-    if options.listDirs:
+    if not argv:
+        check_directory_status(True)
         __show_directories__()
-    elif options.change_directory is not None:
-        __change_directory__(options.change_directory)
-    elif options.remove:
-        __remove_directory__()
-    elif options.scan is not None:
-        __scan_directory__(options.scan)
     else:
-        __scan_directory__(options.new, False)
-        __create_directory__(options.new)
+        if options.listDirs:
+            __show_directories__()
+        elif options.change_directory is not None:
+            __change_directory__(options.change_directory)
+        elif options.remove:
+            __remove_directory__()
+        elif options.scan is not None:
+            __scan_directory__(options.scan[0])
+        else:
+            __scan_directory__(options.new, False)
+            __create_directory__(options.new)
 
 
 if __name__=='__main__':
