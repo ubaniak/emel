@@ -10,12 +10,9 @@ def setup_arg_parser():
     return parser
 
 
-
-
 def main(argv):
     '''
     '''
-
     parser = setup_arg_parser()
     parser.parse_args(argv)
 

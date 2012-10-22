@@ -11,8 +11,8 @@ def trace_errors(e):
     for i in inspect.trace()[1:]:
         frameInfo = inspect.getframeinfo(i[0])
         #print frameInfo
-        print '\t"{1}": {0}'.format(frameInfo.lineno,frameInfo.filename)
-        print '\t\t({0})'.format(', '.join([ c.strip() for c in frameInfo.code_context ]))
+        print '    {0} : {1} : {2}'.format(frameInfo.filename, frameInfo.function, frameInfo.lineno)
+        print '               <{0}>'.format(', '.join([ c.strip() for c in frameInfo.code_context ]))
         
 
 def list_all_actions():

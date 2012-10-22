@@ -10,96 +10,92 @@ from utils.userinput.userinput import yes_no_option
 from emel_globals import EMEL_CONFIG_FILE, Data
 from emel.status import check_directory_status
 
+
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
     if Data.SECTION not in config: config[Data.SECTION] = {}
     if Data.CURRENT not in config[Data.SECTION]: config[Data.SECTION][Data.CURRENT] = ''
-    if Data.ALL not in config[Data.SECTION]: config[Data.SECTION][Data.ALL] = []
+    if Data.ALL not in config[Data.SECTION]: config[Data.SECTION][Data.ALL] = {}
     return config
 
 
-def __scan_directory__(location, addCurrent=True):
+def __scan_directory__(locations, addCurrent=True):
     '''
     Scans a given location for any directories with a data marker in it.
     If it finds a directory 
     '''
     config = __validate_config__()
-    location = os.getcwd() if not location else location
-    print 'Scanning', location, '...',
-    files = [ root for root, _, files in os.walk(location) if Data.MARKER in files ]
-    untracked = [ f for f in files if f not in config[Data.SECTION][Data.ALL] ]
+    locations = [os.getcwd()] if not locations else locations
+    for location in locations:
+        print 'Scanning', location, '...',
+        files = [ root for root, _, files in os.walk(location) if Data.MARKER in files ]
+        print '\n'
+        print config[Data.SECTION][Data.ALL].values()
+        print files
+        untracked = [ {os.path.split(f)[-1]: f} for f in files if f not in config[Data.SECTION][Data.ALL].values() ]
 
-    print 'Done.\n'
-    print 'Found (', len(untracked), ') untracked folders.\n'
-    if untracked:
-        [ config[Data.SECTION][Data.ALL].append(f) for f in untracked ]
-        if not config[Data.SECTION][Data.CURRENT] and addCurrent:
-            print '\nCurrent directory is not set.'
-            print 'Setting"',config[Data.SECTION][Data.ALL][0], '" as current.'
-            config[Data.SECTION][Data.CURRENT] = config[Data.SECTION][Data.ALL][0]
-        config.write()
+        print 'Done.\n'
+        print 'Found (', len(untracked), ') untracked folder(s).\n'
+        print untracked
+        exit()
+        if untracked:
+            [ config[Data.SECTION][Data.ALL].update(f) for f in untracked ]
+            if not config[Data.SECTION][Data.CURRENT] and addCurrent:
+                print '\n[WARNING] Current directory is not set.'
+            config.write()
 
 
-def __create_directory__(location, setAsCurrent=True, create=True, islocation=True):
+def __create_directory__(data_tuple, setAsCurrent=True, create=True, islocation=True):
     '''
     Sets the location of the data directory in the emel.config file.
     '''
     config = __validate_config__()
-    location = os.getcwd() if not location else location
-    current = create_path([location, 'Data']) if islocation else location
-    if create: 
-        print 'Attempting to create', current
-        current = create_dir(current, True, True)
-        if current: create_marker(current, Data.MARKER)
+    data_tuple = data_tuple if isinstance(data_tuple, list) else [data_tuple]
+    lable = data_tuple[0]
+    location = create_path([data_tuple[1],lable]) if len(data_tuple) > 1 else create_path([os.getcwd(), lable])
 
-    if setAsCurrent and current: config[Data.SECTION][Data.CURRENT] = current
-    if current and current not in config[Data.SECTION][Data.ALL]: config[Data.SECTION][Data.ALL].append(current)
+    if create: 
+        print 'Attempting to create', lable, 'at location', location
+        current = create_dir(location, True, True)
+        if current: create_marker(current, Data.MARKER)
+        if not os.path.isdir(location):
+            print '[ERROR] "{0}" is not a valid path.'.format(location)
+            exit()
+
+    if current and setAsCurrent: config[Data.SECTION][Data.CURRENT] = lable
+    if current and lable not in config[Data.SECTION][Data.ALL]: config[Data.SECTION][Data.ALL][lable] = location
     print 'Done.'
 
     config.write()
 
 
-def __remove_directory__():
-    '''
-    Removes a location from the config file.
-    Does NOT delete the directory.
-    '''
-    config = __validate_config__()
-    print 'Removing "{0}" as the current directory.'.format(config[Data.SECTION][Data.CURRENT])
-    print "This will not delete the folder."
-    config[Data.SECTION][Data.CURRENT] = ''
-    config.write()
-
-
 def __show_directories__():
     '''
-    Show all the data directories stored in all_data_dirs.
+    Show all the data directories stored in the "all" section in the config file. 
     '''
     config = __validate_config__()
-    i = 0
     if not config[Data.SECTION][Data.ALL]:
         print 'No data directories are listed'
         return
 
     print 'All known data directories:'
-    for dd in config[Data.SECTION][Data.ALL]:
-        if dd == config[Data.SECTION][Data.CURRENT]:
-            print '  #   *','(',i,')',dd
+    dirs = config[Data.SECTION][Data.ALL]
+    for lable, location in zip(dirs.keys(), dirs.values()):
+        if lable == config[Data.SECTION][Data.CURRENT]:
+            print '  #   *','(',lable,')',location
         else:
-            print '  #    ','(',i,')',dd
-        i += 1
+            print '  #    ','(',lable,')',location
 
 
-def __change_directory__(newLocation):
+def __change_directory__(lable):
     config = __validate_config__()
-    i = 0
-    for directory in config[Data.SECTION][Data.ALL]:
-        if i == newLocation: 
-            print 'Changing current directory to "{0}"'.format(directory)
-            config[Data.SECTION][Data.CURRENT] = directory
-            config.write()
-            break
-        i += 1
+    if lable not in config[Data.SECTION][Data.ALL]:
+        print '"{0}" is not a known data directory.'.format(lable)
+    else:
+        print 'Setting new directory to "{0}"'.format(lable)
+        config[Data.SECTION][Data.CURRENT] = lable
+        config[Project.SECTION][Project.CURRENT] = ''
+        config.write()
 
 
 def setup_arg_parser():
@@ -109,15 +105,13 @@ def setup_arg_parser():
     parser = argparse.ArgumentParser(description='This module sets the location of the emel Data directory.')
 
     parser.add_argument('-n', '--new', action='store', nargs='*',  
-                    dest='new', default=os.getcwd(), help='Sets the location of the data directory. If not given, data will use the current working directory')
-    parser.add_argument('-rm', '--remove', action='store_true', 
-                    dest='remove', help='Removes the data directory from the config file. This will NOT delete the data directory.')
+                    dest='new', default=os.getcwd(), help='<lable> <location> Sets the location of the data directory. If a location is not given, data will use the current working directory')
     parser.add_argument('-ls', '--list', action='store_true', 
                     dest='listDirs', help='List all known Data directories')
-    parser.add_argument('-cd', '--change_directory', action='store', type=int, 
+    parser.add_argument('-cd', '--change_directory', action='store', 
                     dest='change_directory', default=None, help='Change the current directory to one of the known directories. Uses the index given from ls.')
     parser.add_argument('-s', '--scan', action='store', nargs='*', 
-                    dest='scan', default=None, help='Scans a given directory to see if data directories exist in a given location. If they do the tool will add them to the list of known data directories.')
+                    dest='scan', default=None, help='Scans a given directory for the existance of unknown data directories. If they do the tool will add them to the list of known data directories.')
     return parser
 
 
@@ -135,12 +129,10 @@ def main(argv):
             __show_directories__()
         elif options.change_directory is not None:
             __change_directory__(options.change_directory)
-        elif options.remove:
-            __remove_directory__()
         elif options.scan is not None:
-            __scan_directory__(options.scan[0])
+            __scan_directory__(options.scan)
         else:
-            __scan_directory__(options.new, False)
+            __scan_directory__(options.new[1] if len(options.new) > 1 else None, False)
             __create_directory__(options.new)
 
 

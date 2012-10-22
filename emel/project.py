@@ -5,7 +5,7 @@ import os
 from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
-from emel.status import check_directory_status 
+from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data
 
 
@@ -35,9 +35,9 @@ def __list_projects__(verbose=False):
         for project in projects:
             project = os.path.split(project)[-1] 
             if project == config[Project.SECTION][Project.CURRENT]:
-                print '  #   *','(',i,')',project
+                print '  #   *','(',project,')'
             else:
-                print '  #    ','(',i,')',project
+                print '  #    ','(',project,')'
             i += 1
     return projects
 
@@ -66,16 +66,14 @@ def __new_project__(newProject):
     print '"{0}" Successfully created.'.format(newProject)
 
 
-def __change_project__(n):
+def __change_project__(project):
     config = __validate_config__()
-    i = 0
-    for project in __list_projects__():
-        if i == n: 
-            print 'Changing current directory to "{0}"'.format(project)
-            config[Project.SECTION][Project.CURRENT] = project
-            config.write()
-            break
-        i += 1
+    if project not in __list_projects__():
+        print '"{0}" not found'.format(project)
+    else:
+        config[Project.SECTION][Project.CURRENT] = project
+        config.write()
+
 
 def setup_arg_parser():
     '''
@@ -87,7 +85,7 @@ def setup_arg_parser():
                     dest='new', default=None, help='creates a new project.')
     parser.add_argument('-ls', '--list', action='store_true', 
                     dest='listProjs', help='List all projects')
-    parser.add_argument('-cp', '--change_project', action='store', type=int, 
+    parser.add_argument('-cp', '--change_project', action='store', 
                     dest='change_project', default=None, help='Change the current project')
     return parser
 
@@ -95,18 +93,21 @@ def setup_arg_parser():
 def main(argv):
     '''
     '''
-    if not check_directory_status(True):
+    if not check_directory_status():
         exit()
+    if not argv:
+        check_project_status(True)
+    else:
 
-    parser = setup_arg_parser()
-    options = parser.parse_args(argv)
+        parser = setup_arg_parser()
+        options = parser.parse_args(argv)
 
-    if options.new:
-        __new_project__(options.new)
-    elif options.listProjs:
-        __list_projects__(verbose=True)
-    elif options.change_project is not None:
-        __change_project__(options.change_project)
+        if options.new:
+            __new_project__(options.new)
+        elif options.listProjs:
+            __list_projects__(verbose=True)
+        elif options.change_project is not None:
+            __change_project__(options.change_project)
 
 
 if __name__=='__main__':

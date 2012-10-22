@@ -2,16 +2,16 @@ import sys
 import argparse
 import os
 from utils.settings.configobj import ConfigObj
+from emel_globals import Project, Data, EMEL_CONFIG_FILE
 
-EMEL_CONFIG_FILE = os.getcwd() + os.sep + 'emel.conf'
 
 def check_directory_status(verbose=False):
 
     config = ConfigObj(EMEL_CONFIG_FILE)
     try:
-        cd = config['data']['current']
+        cd = config[Data.SECTION][Data.CURRENT]
         if not cd: raise KeyError
-        if verbose: print 'Current data directory set to "{0}"\n'.format(cd) 
+        if verbose: print 'Current data directory set to ({0}) {1}\n'.format(cd, config[Data.SECTION][Data.ALL][cd]) 
     except KeyError as e:
         if verbose: print '[WARNING] Current data directory not set.'
         if verbose: print 'please run emel data -h for more help\n'
@@ -23,9 +23,9 @@ def check_project_status(verbose=False):
 
     config = ConfigObj(EMEL_CONFIG_FILE)
     try:
-        cp = config['project']['current']
+        cp = config[Project.SECTION][Project.CURRENT]
         if not cp: raise KeyError
-        if verbose: print 'Current project set to "{0}"\n'.format(cp)
+        if verbose: print 'Current project set to ({0})\n'.format(cp)
     except KeyError as e:
         if verbose: print '[WARNING] Current project not set.'
         if verbose: print 'please run emel project -h for more help\n'
