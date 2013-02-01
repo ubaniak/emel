@@ -70,7 +70,8 @@ def __get_catagories__(verbose=True, is_global=True):
     files = [ root for root, _, files in os.walk(tools_path) ]
     files = [ os.path.split(f)[-1] for f in files[1:] ]
     if verbose:
-        print 'Project specific catagories:' if not is_global else "Global catagories:"
+        project = config[Project.SECTION][Project.CURRENT]
+        print 'Project ('+project+') specific catagories:' if not is_global else "Global catagories:"
         for f in files:
             print '\t', f
     return files
@@ -93,6 +94,10 @@ def __show_catagories__(location):
 def __list_tools__(location=BOTH):
     config = __validate_config__()
     location = location if location else BOTH
+<<<<<<< HEAD
+=======
+    raise NotImplementedError('do this you lazy ...')
+>>>>>>> :forgot to add files
 
 
 def setup_arg_parser():
