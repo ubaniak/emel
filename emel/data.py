@@ -5,9 +5,10 @@ from glob import glob
 import re
 
 from utils.settings.configobj import ConfigObj
+#from utils.settings.configmanager import ConfigManager
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
-from emel_globals import EMEL_CONFIG_FILE, Data
+from emel_globals import EMEL_CONFIG_FILE, Data, Project, INIT_MARKER
 from emel.status import check_directory_status
 
 
@@ -16,6 +17,8 @@ def __validate_config__():
     if Data.SECTION not in config: config[Data.SECTION] = {}
     if Data.CURRENT not in config[Data.SECTION]: config[Data.SECTION][Data.CURRENT] = ''
     if Data.ALL not in config[Data.SECTION]: config[Data.SECTION][Data.ALL] = {}
+    if Project.SECTION not in config: config[Project.SECTION] = {}
+    if Project.CURRENT not in config[Project.SECTION]: config[Project.SECTION][Project.CURRENT] = ''
     return config
 
 
@@ -29,15 +32,10 @@ def __scan_directory__(locations, addCurrent=True):
     for location in locations:
         print 'Scanning', location, '...',
         files = [ root for root, _, files in os.walk(location) if Data.MARKER in files ]
-        print '\n'
-        print config[Data.SECTION][Data.ALL].values()
-        print files
         untracked = [ {os.path.split(f)[-1]: f} for f in files if f not in config[Data.SECTION][Data.ALL].values() ]
 
         print 'Done.\n'
         print 'Found (', len(untracked), ') untracked folder(s).\n'
-        print untracked
-        exit()
         if untracked:
             [ config[Data.SECTION][Data.ALL].update(f) for f in untracked ]
             if not config[Data.SECTION][Data.CURRENT] and addCurrent:
@@ -51,15 +49,21 @@ def __create_directory__(data_tuple, setAsCurrent=True, create=True, islocation=
     '''
     config = __validate_config__()
     data_tuple = data_tuple if isinstance(data_tuple, list) else [data_tuple]
+    if not data_tuple:
+        print '[ERROR] Please supply a lable for this data directory.'
+        exit()
+    
     lable = data_tuple[0]
     location = create_path([data_tuple[1],lable]) if len(data_tuple) > 1 else create_path([os.getcwd(), lable])
 
     if create: 
-        print 'Attempting to create', lable, 'at location', location
+        print 'Attempting to create', lable, 'at location', location, 
         current = create_dir(location, True, True)
-        if current: create_marker(current, Data.MARKER)
+        if current:
+            create_marker(current, Data.MARKER)
+            create_marker(current, INIT_MARKER)
         if not os.path.isdir(location):
-            print '[ERROR] "{0}" is not a valid path.'.format(location)
+            print '\n[ERROR] "{0}" is not a valid path.'.format(location)
             exit()
 
     if current and setAsCurrent: config[Data.SECTION][Data.CURRENT] = lable
@@ -104,7 +108,7 @@ def setup_arg_parser():
     '''
     parser = argparse.ArgumentParser(description='This module sets the location of the emel Data directory.')
 
-    parser.add_argument('-n', '--new', action='store', nargs='*',  
+    parser.add_argument('-n', '--new', action='store', nargs='+',  
                     dest='new', default=os.getcwd(), help='<lable> <location> Sets the location of the data directory. If a location is not given, data will use the current working directory')
     parser.add_argument('-ls', '--list', action='store_true', 
                     dest='listDirs', help='List all known Data directories')
