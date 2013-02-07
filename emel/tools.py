@@ -94,10 +94,7 @@ def __show_catagories__(location):
 def __list_tools__(location=BOTH):
     config = __validate_config__()
     location = location if location else BOTH
-<<<<<<< HEAD
-=======
     raise NotImplementedError('do this you lazy ...')
->>>>>>> :forgot to add files
 
 
 def setup_arg_parser():
