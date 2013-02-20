@@ -13,7 +13,7 @@ def create_dir(directory, interactive=False, force=False, verbose=False):
     directory, the path to where you want to create the directory
     interactive, if a directory already exists, ask the user if they want to create a directory with the same name
                 but with a (i) next to it.
-    force, same as interactive but does not ask the user if they want 
+    force, same as interactive but does not ask the user. 
     '''
     if not os.path.isdir(directory):
         if verbose: print 'Creating "{0}"'.format(directory)
@@ -51,12 +51,12 @@ def create_path(paths):
 
 def create_marker(path, marker):
     '''
-    This function places an __data__.emel file in a data folder
-    in order to mark it as an emel data directory
+    This function places a __<???>__.emel file in a folder
+    in order to mark it as an emel directory
     '''
     with open( os.sep.join([path, marker]), 'w') as f: f.close()
 
-def get_emel_file_path(fileType):
+def __get_emel_file_path__(fileType):
     if fileType.lower() not in ['raw', 'processed', 'train']: raise TypeError( 'unknown file type {}. Only use raw, process, train'.format(fileType) )
     
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -67,3 +67,12 @@ def get_emel_file_path(fileType):
     dataDir = config[Data.SECTION][Data.CURRENT] 
     project = config[Project.SECTION][Project.CURRENT]
     return create_path( [dataDir, project,  fileType] )
+
+def emel_raw_file_path():
+    return __get_emel_file_path__('raw')
+
+def emel_processed_file_path():
+    return __get_emel_file_path__('processed')
+
+def emel_train_file_path():
+    return __get_emel_file_path__('train')
