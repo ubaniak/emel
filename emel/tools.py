@@ -76,6 +76,27 @@ def __get_catagories__(verbose=True, is_global=True):
             print '\t', f
     return files
 
+def __show_tools__(verbose=True, is_global=True):
+    config = __validate_config__()
+    if not is_global:
+        data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
+        project = config[Project.SECTION][Project.CURRENT]
+
+        tools_path = create_path([data_dir, project, 'tools'])
+    else:
+        tools_path = create_path(['tools'])
+
+    project = config[Project.SECTION][Project.CURRENT]
+    print 'Project ('+project+')  catagories:' if not is_global else "Global catagories:"
+    
+    for root, d, files in os.walk(tools_path):
+        catagory = os.path.split(root)[-1]
+        if catagory != 'tools':
+            print '\t', catagory
+            files = [ f for f in files if not f.startswith('__') ]
+            for f in files:
+                print '\t\t', f
+
 
 def __show_catagories__(location):
     config = __validate_config__()
@@ -89,13 +110,16 @@ def __show_catagories__(location):
         __get_catagories__()
         __get_catagories__(is_global=False)
 
-
-
-def __list_tools__(location=BOTH):
+def __list_tools__(location):
     config = __validate_config__()
     location = location if location else BOTH
-    raise NotImplementedError('do this you lazy ...')
-
+    if location == GLOBAL:
+        __show_tools__()
+    elif location == PROJECT:
+        __show_tools__(is_global=False)
+    elif location == BOTH:
+        __show_tools__()
+        __show_tools__(is_global=False)
 
 def setup_arg_parser():
     '''
