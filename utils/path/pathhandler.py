@@ -57,14 +57,16 @@ def create_marker(path, marker):
     with open( os.sep.join([path, marker]), 'w') as f: f.close()
 
 def __get_emel_file_path__(fileType):
-    if fileType.lower() not in ['raw', 'processed', 'train']: raise TypeError( 'unknown file type {}. Only use raw, process, train'.format(fileType) )
+    allowed_types = ['raw','processed','train','tools']
+    if fileType.lower() not in allowed_types: raise TypeError( 'unknown file type {}. Only use {}'.format(fileType, ','.join(allowed_types)) )
     
     config = ConfigObj(EMEL_CONFIG_FILE)
     
     if not check_directory_status(): exit(1)
     if not check_project_status(): exit(1)
 
-    dataDir = config[Data.SECTION][Data.CURRENT] 
+    currData = config[Data.SECTION][Data.CURRENT] 
+    dataDir = config[Data.SECTION][Data.ALL][currData]
     project = config[Project.SECTION][Project.CURRENT]
     return create_path( [dataDir, project,  fileType] )
 
@@ -76,6 +78,9 @@ def emel_processed_file_path():
 
 def emel_train_file_path():
     return __get_emel_file_path__('train')
+
+def emel_project_tools_file_path():
+    return __get_emel_file_path__('tools')
 
 def emel_project_path():
     config = ConfigObj(EMEL_CONFIG_FILE)

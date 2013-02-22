@@ -1,7 +1,7 @@
 import sys
 import argparse
 from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
-from utils.path.pathhandler import emel_project_file_path
+from utils.path.pathhandler import emel_project_tools_file_path
 from utils.settings.configobj import ConfigObj
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 
@@ -30,6 +30,7 @@ def __create_train__():
     config = __validate_config__()
 
     trainPath = emel_train_file_path()
+    print emel_project_tools_file_path()
 
     print 'Creating train object ...',
     with open( create_path([trainPath, 'train.py']), 'w' ) as fp:
