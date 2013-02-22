@@ -31,9 +31,8 @@ class Train(object):
         pass
 """
 
-DEFAULT_TRAIN_LIST = """
-order = [('gather_data', {}), ('pre_process', {}), ('train', {})]
-"""
+DEFAULT_TRAIN_LIST = "order = [('gather_data', {}), ('pre_process', {}), ('train', {})]"
+
 
 def __create_train__():
     config = __validate_config__()
