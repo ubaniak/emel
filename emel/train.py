@@ -1,5 +1,9 @@
 import sys
 import argparse
+from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
+from utils.path.pathhandler import emel_project_file_path
+from utils.settings.configobj import ConfigObj
+from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -10,8 +14,10 @@ def __validate_config__():
     if Project.CURRENT not in config[Project.SECTION]: config[Project.SECTION][Project.CURRENT] = ''
     return config
 
-train_object_template = """
-class Trein(object):
+TRAIN_TEMPLATE = """
+import sys
+
+class Train(object):
     def gather_data(self):
         pass
     def pre_process(self):
@@ -23,10 +29,13 @@ class Trein(object):
 def __create_train__():
     config = __validate_config__()
 
-    fp = open( create_path(['train.py']), 'w' )
-    fp.write( TOOL_TEMPLATE.format(tool_name, re.sub('\\\\', '/', new_cat_path)) )
-    fp.close()
-    pass
+    trainPath = emel_train_file_path()
+
+    print 'Creating train object ...',
+    with open( create_path([trainPath, 'train.py']), 'w' ) as fp:
+        fp.write(TRAIN_TEMPLATE)
+    create_marker( trainPath, INIT_MARKER )
+    print 'Done.'
 
 def setup_arg_parser():
     '''
