@@ -20,6 +20,8 @@ import sys
 sys.path.append('{}')
 import tools as project_tools
 
+{}
+
 class Train(object):
     def gather_data(self):
         pass
@@ -29,17 +31,24 @@ class Train(object):
         pass
 """
 
+DEFAULT_TRAIN_LIST = """
+order = [('gather_data', {}), ('pre_process', {}), ('train', {})]
+"""
+
 def __create_train__():
     config = __validate_config__()
 
     trainPath = emel_train_file_path()
-    train_object = TRAIN_TEMPLATE.format(emel_project_tools_file_path())
+    train_object = TRAIN_TEMPLATE.format(emel_project_tools_file_path(), DEFAULT_TRAIN_LIST)
 
     print 'Creating train object ...',
     with open( create_path([trainPath, 'train.py']), 'w' ) as fp:
         fp.write(TRAIN_TEMPLATE)
     create_marker( trainPath, INIT_MARKER )
     print 'Done.'
+
+def __run_train__():
+    pass
 
 def setup_arg_parser():
     '''
