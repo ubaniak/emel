@@ -76,3 +76,9 @@ def emel_processed_file_path():
 
 def emel_train_file_path():
     return __get_emel_file_path__('train')
+
+def emel_project_path():
+    config = ConfigObj(EMEL_CONFIG_FILE)
+    dataDir = config[Data.SECTION][Data.CURRENT] 
+    project = config[Project.SECTION][Project.CURRENT]
+    return create_path([dataDir, project])
