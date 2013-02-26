@@ -25,7 +25,7 @@ def __validate_config__():
     return config
 
 
-def __list_dependencies__():
+def __list_dependencies__(verbose=False):
     the_list = DEFULT
     if check_project_status():
         the_list = []
@@ -36,23 +36,29 @@ def __list_dependencies__():
                 if not line.startswith('#'):
                     line = line.split('#')
                     the_list.append(line[0].strip())
-
+    can_run = True
     for module in the_list:
         try:
             imp.find_module(module)
-            print module, '[Installed]'
+            if verbose:
+                print module, '[Installed]'
         except ImportError:
-            print module, '[Missing]'
+            if verbose:
+                print module, '[Missing]'
+            can_run = False
+
+    return can_run
 
 
-
-def __create_dep_list__():
+def __create_dep_list__(check_first=True):
     if not check_directory_status(True):
         exit()
     if not check_project_status(True):
         exit()
-    message = 'Creatint dependency file for project.\n WARNING: will overrite existing file. Continue?'
-    create = yes_no_option(message)
+    create = True
+    if check_first:
+        message = 'Creatint dependency file for project.\n WARNING: will overrite existing file. Continue?'
+        create = yes_no_option(message)
 
     if create:
         depFile = create_path([emel_project_path(), DEPENDENCY_FILE])
@@ -62,7 +68,6 @@ def __create_dep_list__():
                 f.write(module)
                 f.write('\n')
             f.write('# End emel defaults #')
-        print 'Done.'
 
 
 def setup_arg_parser():
@@ -85,7 +90,7 @@ def main(argv):
     options = parser.parse_args(argv)
 
     if options.listDeps:
-        __list_dependencies__()
+        __list_dependencies__(True)
     elif options.new:
         __create_dep_list__()
 
