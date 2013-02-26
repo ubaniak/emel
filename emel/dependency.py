@@ -6,9 +6,14 @@ import imp
 
 from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
+from utils.path.pathhandler import emel_project_path
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data
+
+# The default list of things emel needs.
+DEFULT = ['sklearn']
+DEPENDENCY_FILE = 'dependency'
 
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -20,21 +25,16 @@ def __validate_config__():
     return config
 
 
-def __check_dependencies__():
-    default = ['sklearn', 're']
+def __list_dependencies__():
+    the_list = DEFULT
 
-    for module in default:
+    for module in the_list:
         try:
             imp.find_module(module)
-            print 'Successfully imported {}'.format(module)
+            print module, '[Installed]'
         except ImportError:
-            print '!!! Cannot import {}'.format(module)
+            print module, '[Missing]'
 
-        
-
-
-def __list_dependencies__():
-    pass
 
 
 def __create_dep_list__():
@@ -42,7 +42,15 @@ def __create_dep_list__():
         exit()
     if not check_project_status(True):
         exit()
-    pass
+    message = 'Creatint dependency file for project.\n WARNING: will overrite existing file. Continue?'
+    create = yes_no_option(message)
+
+    if create:
+        depFile = create_path([emel_project_path(), DEPENDENCY_FILE])
+        with open(depFile, 'w') as f:
+            for module in DEFULT:
+                f.write(module)
+        print 'Done.'
 
 
 def setup_arg_parser():
@@ -51,8 +59,6 @@ def setup_arg_parser():
     '''
     parser = argparse.ArgumentParser(description='Check if 3rd party python packages are installed.')
 
-    parser.add_argument('-c', '--check', action='store_true', 
-                    dest='check', help='Checks the dependencies.')
     parser.add_argument('-n', '--new', action='store_true', 
                     dest='new', help='Creates a new dependency file in the current project directory.')
     parser.add_argument('-ls', '--list', action='store_true', 
@@ -70,9 +76,7 @@ def main(argv):
         __list_dependencies__()
     elif options.new:
         __create_dep_list__()
-    elif options.check:
-        __check_dependencies__()
 
 
 if __name__=='__main__':
-    main(sys.argv[1:])
+        main(sys.argv[1:])
