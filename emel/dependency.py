@@ -27,6 +27,15 @@ def __validate_config__():
 
 def __list_dependencies__():
     the_list = DEFULT
+    if check_project_status():
+        the_list = []
+        depFile = create_path([emel_project_path(), DEPENDENCY_FILE])
+
+        with open(depFile, 'r') as f:
+            for line in f.readlines():
+                if not line.startswith('#'):
+                    line = line.split('#')
+                    the_list.append(line[0].strip())
 
     for module in the_list:
         try:
@@ -48,8 +57,11 @@ def __create_dep_list__():
     if create:
         depFile = create_path([emel_project_path(), DEPENDENCY_FILE])
         with open(depFile, 'w') as f:
+            f.write('# emel default packages #\n')
             for module in DEFULT:
                 f.write(module)
+                f.write('\n')
+            f.write('# End emel defaults #')
         print 'Done.'
 
 
