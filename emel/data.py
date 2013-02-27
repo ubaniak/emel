@@ -38,10 +38,11 @@ def __scan_directory__(locations, addCurrent=True):
         print 'Found (', len(untracked), ') untracked folder(s).\n'
         if untracked:
             [ config[Data.SECTION][Data.ALL].update(f) for f in untracked ]
-            if not config[Data.SECTION][Data.CURRENT] and addCurrent:
-                print '\n[WARNING] Current directory is not set.'
             config.write()
 
+        if not config[Data.SECTION][Data.CURRENT] and addCurrent:
+            print '\n[WARNING] Current directory is not set.'
+            print 'use emel.py data cd <label> to set the data directory.'
 
 def __create_directory__(data_tuple, setAsCurrent=True, create=True, islocation=True):
     '''
@@ -89,6 +90,9 @@ def __show_directories__():
             print '  #   *','(',lable,')',location
         else:
             print '  #    ','(',lable,')',location
+    if not config[Data.SECTION][Data.CURRENT]:
+        print '\n[WARNING] No current directory set'
+        print 'use emel.py data cd <label> to set the data directory.'
 
 
 def __change_directory__(lable):
