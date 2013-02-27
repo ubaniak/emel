@@ -8,6 +8,7 @@ from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
+from emel_globals import BACKUP
 
 from datetime import datetime
 
@@ -66,6 +67,7 @@ def __create_train__():
 
 
 def __run_train__():
+    config = __validate_config__()
     trainPath = emel_train_file_path()
 
     # Create a backup train folder
@@ -75,6 +77,7 @@ def __run_train__():
     print 'Done.'
     
     if backupPath:
+        config[BACKUP] = backupPath
         trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
         trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
 

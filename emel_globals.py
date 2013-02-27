@@ -7,6 +7,8 @@ EMEL_CONFIG_FILE = os.path.join(os.getcwd(), 'emel.conf')
 EMEL_UTILS_FILE = os.path.join(os.getcwd(), 'utils')
 INIT_MARKER = '__init__.py'
 
+BACKUP = 'backup'
+
 class Data:
     SECTION = 'data'
     CURRENT = 'current'
