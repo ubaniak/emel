@@ -66,7 +66,7 @@ def __sanitize_moduel__(module):
 
 
 def __install_dependencies__(verbose=False):
-    message = ('WARNING: This will install all listed dependencies.\n'
+    message = ('[WARNING] This will install all listed dependencies.\n'
                'Please make sure you are sudo.')
     go = yes_no_option(message)
     if go:
@@ -108,7 +108,7 @@ def __create_dep_list__(check_first=True):
         exit()
     create = True
     if check_first:
-        message = 'Creatint dependency file for project.\n WARNING: will overrite existing file. Continue?'
+        message = 'Creatint dependency file for project.\n [WARNING] will overrite existing file. Continue?'
         create = yes_no_option(message)
 
     if create:
