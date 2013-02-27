@@ -1,12 +1,15 @@
 import imp
 import sys
 import argparse
+import subprocess
 from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
-from utils.path.pathhandler import emel_project_tools_file_path
+from utils.path.pathhandler import emel_project_tools_file_path, create_dir
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
+
+from datetime import datetime
 
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -61,17 +64,41 @@ def __create_train__():
     else:
         print 'Aborting'
 
+
 def __run_train__():
     trainPath = emel_train_file_path()
-    trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
-    trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
 
-    train_order = imp.load_source('train_order', trainOrderPath)
-    train_object = imp.load_source('train', trainObjectPath)
+    # Create a backup train folder
+    folderName = datetime.now().strftime('Train_%Y%m%dT%H%M%S')
+    print 'Creating backup folder "{}" ...'.format(folderName),
+    backupPath = create_dir(create_path([trainPath, folderName]))
+    print 'Done.'
+    
+    if backupPath:
+        trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
+        trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
 
-    train = train_object.Train()
-    for function in train_order.order:
-        getattr(train, function)(**train_order.args[function])
+        # copy over the train order and train object files.
+        print 'Backing up the train order ...'
+        subprocess.call(['cp', trainOrderPath, backupPath])
+        print 'Done.'
+        print 'Backing up train object ...'
+        subprocess.call(['cp', trainObjectPath, backupPath])
+        print 'Done.'
+
+        train_order = imp.load_source('train_order', trainOrderPath)
+        train_object = imp.load_source('train', trainObjectPath)
+
+        train = train_object.Train()
+        f = open(create_path([backupPath, 'time.txt']), 'w')
+        for function in train_order.order:
+            start = datetime.now()
+            getattr(train, function)(**train_order.args[function])
+            f.write('Function "{}" (Took: {})\n'.format(function, datetime.now() - start))
+        f.close()
+    else:
+        print '[ERROR] Could not create backup train folder.'
+
 
 def setup_arg_parser():
     '''
