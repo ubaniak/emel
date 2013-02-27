@@ -1,3 +1,4 @@
+import imp
 import sys
 import argparse
 from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
@@ -51,6 +52,8 @@ def __create_train__():
     print 'Done.'
 
 def __run_train__():
+    # 1. get the train orde
+    # 2. get the train object.
     pass
 
 def setup_arg_parser():
