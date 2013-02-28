@@ -3,7 +3,8 @@ This file is used to store constants that are global to emel.
 '''
 import os
 # Config 
-EMEL_CONFIG_FILE = os.getcwd() + os.sep + 'emel.conf'
+EMEL_CONFIG_FILE = os.path.join(os.getcwd(), 'emel.conf')
+EMEL_UTILS_FILE = os.path.join(os.getcwd(), 'utils')
 INIT_MARKER = '__init__.py'
 
 class Data:

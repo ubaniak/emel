@@ -7,17 +7,21 @@ from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
-from emel_globals import EMEL_CONFIG_FILE, Project, Data
+from emel_globals import EMEL_CONFIG_FILE, EMEL_UTILS_FILE, Project, Data
 GLOBAL = 'g'
 PROJECT = 'p'
 BOTH = 'b'
 
 
 TOOL_TEMPLATE = r'''
+import sys
+sys.path.append('{0}')
 from utils.path.pathhandler import emel_raw_file_path, emel_processed_file_path
 from utils.path.pathhandler import emel_train_file_path, emel_project_path
-def {0}():
-    print "I am a new tool. Find me at {1}"
+
+
+def {1}():
+    print "I am a new tool. Find me at {2}"
 '''
 # TODO: delete projects.
 def __validate_config__():
@@ -55,7 +59,7 @@ def __create_tool__(catagory, tool_name, is_global=True):
        exit()
 
     fp = open( create_path([new_cat_path, tool_name+'.py']), 'w' )
-    fp.write( TOOL_TEMPLATE.format(tool_name, re.sub('\\\\', '/', new_cat_path)) )
+    fp.write( TOOL_TEMPLATE.format(EMEL_UTILS_FILE, tool_name, re.sub('\\\\', '/', new_cat_path)) )
     fp.close()
     print 'Created a new tool at {0}/{1}.py'.format(re.sub('\\\\', '/',new_cat_path), tool_name)
 
