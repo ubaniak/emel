@@ -12,7 +12,10 @@ GLOBAL = 'g'
 PROJECT = 'p'
 BOTH = 'b'
 
+
 TOOL_TEMPLATE = r'''
+from utils.path.pathhandler import emel_raw_file_path, emel_processed_file_path
+from utils.path.pathhandler import emel_train_file_path, emel_project_path
 def {0}():
     print "I am a new tool. Find me at {1}"
 '''
