@@ -1,3 +1,4 @@
+import os
 import imp
 import sys
 import argparse
@@ -95,12 +96,28 @@ def __run_train__():
         train = train_object.Train()
         f = open(create_path([backupPath, 'time.txt']), 'w')
         for function in train_order.order:
+            print 'Running', function
             start = datetime.now()
             getattr(train, function)(**train_order.args[function])
             f.write('Function "{}" (Took: {})\n'.format(function, datetime.now() - start))
         f.close()
     else:
         print '[ERROR] Could not create backup train folder.'
+
+def __list_order__():
+    trainPath = emel_train_file_path()
+    trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
+    trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
+
+    if not os.path.exists(trainOrderPath) or not os.path.exists(trainObjectPath):
+        print '[ERROR] the train object is not properly set up.'
+        print 'please run train -n'
+        exit()
+
+    train_order = imp.load_source('train_order', trainOrderPath)
+    for function in train_order.order:
+        print function
+
 
 
 def setup_arg_parser():
@@ -113,6 +130,8 @@ def setup_arg_parser():
                     dest='new', help='Create a new train object.')
     parser.add_argument('-r', '--run', action='store_true',
                     dest='run', help='Run the current train object.')
+    parser.add_argument('-ls', '--list', action='store_true',
+                    dest='listOrder', help='Shows the order of the functions wich will be run.')
     return parser
 
 
@@ -130,6 +149,8 @@ def main(argv):
         __create_train__()
     elif options.run:
         __run_train__()
+    elif options.listOrder:
+        __list_order__()
 
 if __name__=='__main__':
     main(sys.argv[1:])
