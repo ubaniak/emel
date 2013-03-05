@@ -1,3 +1,4 @@
+import re
 import os
 import imp
 import sys
@@ -27,16 +28,16 @@ SETTINGS_FILE = '''
 # This variable specifies the function to use to download the data.
 # To find a list of available downloaders use emel.py gather-data --downloaders
 # example:
-# downloader=download_http
+#downloader='download_http'
 
 # download
 # a list of tuples where the first item in where to get the file from
 # and the second item is where to download the data to.
 # The function will always put the data in the data/raw folder.
-# download = [(from location, to location), ...]
+#to_download=[(from location, to location), ...]
 '''
 
-SETTING_FILE_NAME = 'settings'
+SETTING_FILE_NAME = 'settings.py'
 
 def __create_dg__():
     message = ('[WARNING] This will destroy any existing data gathering settings. Continue?')
@@ -55,11 +56,58 @@ def __create_dg__():
 
 
 def __run_dg__():
-    pass
+    if not os.path.exists(dg_file):
+        print '[ERROR] settings file does not exist.'
+        print 'pleas run emel.py gather-data -h'
+        exit()
 
+    settings = imp.load_source('train_order', dg_file)
+    downloaders = imp.load_source('downloaders', EMEL_UTILS_FILE)
 
-def __show_dg__():
-    pass
+    if hasattr(settings, 'downloader'):
+        downloader = getattr(settings, 'downloader')
+    else:
+        print '[ERROR] downloader must be set.'
+        print 'Go to', create_path([emel_gather_data_file_path(), SETTING_FILE_NAME])
+        exit()
+
+    if hasattr(settings, 'to_download'):
+        to_downlaod = getattr(settings, 'to_download')
+    else:
+        print '[ERROR] to_download must be set.'
+        print 'Go to', create_path([emel_gather_data_file_path(), SETTING_FILE_NAME])
+        exit()
+    
+    getattr(downloaders, downloader)()
+
+    
+
+def __show_settings__():
+    dg_file = create_path([emel_gather_data_file_path(), SETTING_FILE_NAME])
+
+    if not os.path.exists(dg_file):
+        print '[ERROR] settings file does not exist.'
+        print 'pleas run emel.py gather-data -h'
+        exit()
+
+    settings = imp.load_source('train_order', dg_file)
+
+    if hasattr(settings, 'downloader'):
+        downloader = getattr(settings, 'downloader')
+        print 'downloader = ', downloader
+    else:
+        print '[ERROR] downloader must be set.'
+        print 'Go to', create_path([emel_gather_data_file_path(), SETTING_FILE_NAME])
+        exit()
+
+    if hasattr(settings, 'to_download'):
+        to_downlaod = getattr(settings, 'to_download')
+        print 'to_download = ', to_download
+    else:
+        print '[ERROR] to_download must be set.'
+        print 'Go to', create_path([emel_gather_data_file_path(), SETTING_FILE_NAME])
+        exit()
+
 
 
 def __show_downloaders__():
@@ -108,7 +156,7 @@ def main(argv):
     elif options.run:
         __run_dg__()
     elif options.show:
-        __show_dg__()
+        __show_settings__()
     elif options.downloaders:
         __show_downloaders__()
 
