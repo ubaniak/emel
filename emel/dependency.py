@@ -13,7 +13,7 @@ from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data
 
 # The default list of things emel needs.
-DEFULT = ['sklearn']
+DEFULT = ['scikit-learn', 'numpy', 'scipy', 'pandas']
 DEPENDENCY_FILE = 'dependency'
 
 def __validate_config__():
