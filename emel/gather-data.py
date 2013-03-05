@@ -4,7 +4,7 @@ import sys
 import argparse
 import subprocess
 from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
-from utils.path.pathhandler import emel_project_tools_file_path, create_dir
+from utils.path.pathhandler import emel_project_tools_file_path, create_dir, emel_gather_data_file_path
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status

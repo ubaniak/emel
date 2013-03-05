@@ -81,6 +81,9 @@ def emel_train_file_path():
 def emel_project_tools_file_path():
     return __get_emel_file_path__('tools')
 
+def emel_gather_data_file_path():
+    return __get_emel_file_path__('gather_data')
+
 def emel_project_path():
     config = ConfigObj(EMEL_CONFIG_FILE)
     dataDir = config[Data.SECTION][Data.CURRENT] 
