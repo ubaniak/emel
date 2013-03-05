@@ -9,7 +9,7 @@ from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
-from emel_globals import BACKUP
+from emel_globals import EMEL_UTILS_FILE
 
 from datetime import datetime
 
@@ -63,7 +63,16 @@ def __show_dg__():
 
 
 def __show_downloaders__():
-    pass
+    download_folder = 'downloaders'
+
+    dl_path = create_path([EMEL_UTILS_FILE, download_folder])
+    downloaders = os.listdir(dl_path)
+    print 'Available downloader:'
+    for dl in downloaders:
+        if not dl.startswith('__'):
+            print dl
+
+    
 
 
 def setup_arg_parser():
@@ -100,6 +109,8 @@ def main(argv):
         __run_dg__()
     elif options.show:
         __show_dg__()
+    elif options.downloaders:
+        __show_downloaders__()
 
 if __name__=='__main__':
     main(sys.argv[1:])
