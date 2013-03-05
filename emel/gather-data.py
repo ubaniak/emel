@@ -22,15 +22,47 @@ def __validate_config__():
     if Project.CURRENT not in config[Project.SECTION]: config[Project.SECTION][Project.CURRENT] = ''
     return config
 
+SETTINGS_FILE = '''
+# downloader
+# This variable specifies the function to use to download the data.
+# To find a list of available downloaders use emel.py gather-data --downloaders
+# example:
+# downloader=download_http
+
+# download
+# a list of tuples where the first item in where to get the file from
+# and the second item is where to download the data to.
+# The function will always put the data in the data/raw folder.
+# download = [(from location, to location), ...]
+'''
+
+SETTING_FILE_NAME = 'settings'
 
 def __create_dg__():
-    pass
+    message = ('[WARNING] This will destroy any existing data gathering settings. Continue?')
+    go = yes_no_option(message)
+    if go:
+        config = __validate_config__()
+
+        dg_file = emel_gather_data_file_path()
+
+        print 'Creating settings file ...',
+        with open( create_path([dg_file, SETTING_FILE_NAME]), 'w' ) as fp:
+            fp.write(SETTINGS_FILE)
+        print 'Done.'
+    else:
+        print 'Aborting'
 
 
 def __run_dg__():
     pass
 
+
 def __show_dg__():
+    pass
+
+
+def __show_downloaders__():
     pass
 
 
@@ -46,6 +78,8 @@ def setup_arg_parser():
                     dest='run', help='Run the current data gather object.')
     parser.add_argument('-s', '--show', action='store_true',
                     dest='show', help='prints the current data gather settings to stdout.')
+    parser.add_argument('-d', '--downloaders', action='store_true',
+                    dest='downloaders', help='Show all available downloaders.')
     return parser
 
 
