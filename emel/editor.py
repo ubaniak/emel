@@ -9,16 +9,17 @@ from emel_globals import EMEL_CONFIG_FILE, Editor
 
 def __validate_config__():
     config = ConfigObj(EMEL_CONFIG_FILE)
-    if Data.SECTION not in config: config[Data.SECTION] = {}
-    if Data.CURRENT not in config[Data.SECTION]: config[Data.SECTION][Data.CURRENT] = ''
-    if Data.ALL not in config[Data.SECTION]: config[Data.SECTION][Data.ALL] = {}
-    if Project.SECTION not in config: config[Project.SECTION] = {}
-    if Project.CURRENT not in config[Project.SECTION]: config[Project.SECTION][Project.CURRENT] = ''
     return config
 
 
 def __set__(editor):
-    pass
+    print 'Setting default editor to', editor,
+    config = __validate_config__()
+    config[Editor.SECTION] = {}
+    config[Editor.SECTION][Editor.CURRENT] = ''
+    config[Editor.SECTION][Editor.CURRENT] = editor
+    config.write()
+    print 'Done'
 
 def __run__(files):
     pass
