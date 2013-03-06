@@ -151,6 +151,9 @@ def main(argv):
     parser = setup_arg_parser()
     options = parser.parse_args(argv)
 
+    if not check_directory_status(True) or not check_project_status(True):
+        exit()
+
     if options.new_project_tool:
         __create_tool__(options.new_project_tool[0], options.new_project_tool[1], is_global=False)
     elif options.new_global_tool:
