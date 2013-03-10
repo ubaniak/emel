@@ -9,9 +9,6 @@ from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel.editor import __run__
 from emel_globals import EMEL_CONFIG_FILE, EMEL_UTILS_FILE, Project, Data
-GLOBAL = 'g'
-PROJECT = 'p'
-BOTH = 'b'
 
 
 TOOL_TEMPLATE = r'''
@@ -35,24 +32,21 @@ def __validate_config__():
     return config
 
 
-def __create_tool__(catagory, tool_name, is_global=True):
+def __create_tool__(catagory, tool_name):
 
     config = __validate_config__()
-    if not is_global:
-        data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
-        project = config[Project.SECTION][Project.CURRENT]
+    data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
+    project = config[Project.SECTION][Project.CURRENT]
 
-        new_cat_path = create_path([data_dir, project, 'tools', catagory])
-    else:
-        new_cat_path = create_path(['tools', catagory])
+    new_cat_path = create_path([data_dir, project, 'tools', catagory])
 
-    if catagory not in __get_catagories__(is_global=is_global):
+    if catagory not in __get_catagories__(False):
         choice = yes_no_option('"{0}" is not a catagory. Would you like to create it ?'.format(catagory))
         if choice:
             create_dir(new_cat_path, verbose=True)
             create_marker(new_cat_path, '__init__.py')
         else:
-            print '[WARNING] emel did not create {0}->{1}.'.format(catagory, tool_name)
+            print '[WARNING] emel did not create {0}->{1}. user aborted.'.format(catagory, tool_name)
             exit()
 
     if os.path.exists(create_path([new_cat_path, tool_name + '.py'])):
@@ -67,38 +61,31 @@ def __create_tool__(catagory, tool_name, is_global=True):
         __run__([os.path.join(new_cat_path, tool_name + '.py')])
 
 
-def __get_catagories__(verbose=True, is_global=True):
+def __get_catagories__(verbose=True):
     config = __validate_config__()
-    if not is_global:
-        data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
-        project = config[Project.SECTION][Project.CURRENT]
+    data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
+    project = config[Project.SECTION][Project.CURRENT]
 
-        tools_path = create_path([data_dir, project, 'tools'])
-    else:
-        tools_path = create_path(['tools'])
+    tools_path = create_path([data_dir, project, 'tools'])
 
     files = [ root for root, _, files in os.walk(tools_path) ]
     files = [ os.path.split(f)[-1] for f in files[1:] ]
     if verbose:
-        project = config[Project.SECTION][Project.CURRENT]
-        print 'Project ('+project+') specific catagories:' if not is_global else "Global catagories:"
+        print 'Catagories:'
         for f in files:
             print '\t', f
     return files
 
 
-def __show_tools__(verbose=True, is_global=True):
+def __show_tools__(verbose=True):
     config = __validate_config__()
-    if not is_global:
-        data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
-        project = config[Project.SECTION][Project.CURRENT]
-
-        tools_path = create_path([data_dir, project, 'tools'])
-    else:
-        tools_path = create_path(['tools'])
-
+    data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
-    print 'Project ('+project+')  catagories:' if not is_global else "Global catagories:"
+
+    tools_path = create_path([data_dir, project, 'tools'])
+
+    print "Catagories"
+    print '\ttools\n'
     
     for root, d, files in os.walk(tools_path):
         catagory = os.path.split(root)[-1]
@@ -109,44 +96,25 @@ def __show_tools__(verbose=True, is_global=True):
                 print '\t\t', f
 
 
-def __show_catagories__(location):
-    config = __validate_config__()
-    location = location if location else BOTH
-
-    if location == GLOBAL:
-        __get_catagories__()
-    elif location == PROJECT:
-        __get_catagories__(is_global=False)
-    elif location == BOTH:
-        __get_catagories__()
-        __get_catagories__(is_global=False)
+def __show_catagories__():
+    __get_catagories__()
 
 
-def __list_tools__(location):
-    config = __validate_config__()
-    location = location if location else BOTH
-    if location == GLOBAL:
-        __show_tools__()
-    elif location == PROJECT:
-        __show_tools__(is_global=False)
-    elif location == BOTH:
-        __show_tools__()
-        __show_tools__(is_global=False)
+def __list_tools__():
+    __show_tools__()
 
 def setup_arg_parser():
     '''
     Create the argument parser
     '''
-    parser = argparse.ArgumentParser(description='Allows the user to view/create all global or project specific tools.')
+    parser = argparse.ArgumentParser(description='Allows the user to view/create project specific tools.')
 
-    parser.add_argument('-p', '--new_project_tool', action='store', nargs = 2,  
-                    dest='new_project_tool', default=None, help='<catagory>, <name> creates a new project specific tool.')
-    parser.add_argument('-g', '--new_global_tool', action='store', nargs=2, 
-                    dest='new_global_tool', default=None, help='creates a new project specific tool.')
-    parser.add_argument('-ls', '--list', action='store', nargs='?',
-                    dest='list_tools', default='s', help='List all tools.')
-    parser.add_argument('-c', '--show_catagories', nargs='?', action='store', 
-                    dest='show_catagories', default='s', help='Gives a list of all catagories available. Add p for project only, g for global only and b for both.')
+    parser.add_argument('-n', '--new', action='store', nargs = 2,  
+                    dest='new', default=None, help='<catagory>, <name> creates a new project specific tool.')
+    parser.add_argument('-ls', '--list', action='store_true',
+                    dest='list_tools', help='List all tools.')
+    parser.add_argument('-c', '--show_catagories', action='store_true', 
+                    dest='show_catagories', help='Gives a list of all catagories available.')
     return parser
 
 
@@ -159,14 +127,12 @@ def main(argv):
     if not check_directory_status(True) or not check_project_status(True):
         exit()
 
-    if options.new_project_tool:
-        __create_tool__(options.new_project_tool[0], options.new_project_tool[1], is_global=False)
-    elif options.new_global_tool:
-        __create_tool__(options.new_global_tool[0], options.new_global_tool[1], is_global=True)
-    elif options.show_catagories != 's':
-        __show_catagories__(options.show_catagories)
-    elif options.list_tools != 's':
-        __list_tools__(options.list_tools)
+    if options.new:
+        __create_tool__(options.new[0], options.new[1])
+    elif options.show_catagories:
+        __show_catagories__()
+    elif options.list_tools:
+        __list_tools__()
 
 
 if __name__=='__main__':
