@@ -96,6 +96,21 @@ def __show_tools__(verbose=True):
                 print '\t\t', f
 
 
+def __edit_tool__(argv):
+    config = __validate_config__()
+    data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
+    project = config[Project.SECTION][Project.CURRENT]
+
+    tools_path = create_path([data_dir, project, 'tools'])
+
+    for root, d, files in os.walk(tools_path):
+        catagory = os.path.split(root)[-1]
+        if catagory != 'tools':
+            print root, files
+
+
+
+
 def __show_catagories__():
     __get_catagories__()
 
@@ -115,6 +130,8 @@ def setup_arg_parser():
                     dest='list_tools', help='List all tools.')
     parser.add_argument('-c', '--show_catagories', action='store_true', 
                     dest='show_catagories', help='Gives a list of all catagories available.')
+    parser.add_argument('-e', '--edit', action='store', nargs='1',
+                    dest='edit', help='edit a tool.')
     return parser
 
 
@@ -133,6 +150,8 @@ def main(argv):
         __show_catagories__()
     elif options.list_tools:
         __list_tools__()
+    elif options.edit is not None:
+        __edit_tool__(options.edit)
 
 
 if __name__=='__main__':
