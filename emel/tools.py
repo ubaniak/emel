@@ -7,6 +7,7 @@ from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
+from emel.editor import __run__
 from emel_globals import EMEL_CONFIG_FILE, EMEL_UTILS_FILE, Project, Data
 GLOBAL = 'g'
 PROJECT = 'p'
@@ -62,6 +63,8 @@ def __create_tool__(catagory, tool_name, is_global=True):
     fp.write( TOOL_TEMPLATE.format(EMEL_UTILS_FILE, tool_name, re.sub('\\\\', '/', new_cat_path)) )
     fp.close()
     print 'Created a new tool at {0}/{1}.py'.format(re.sub('\\\\', '/',new_cat_path), tool_name)
+    if yes_no_option('Would you like to edit the tool now?'):
+        __run__([os.path.join(new_cat_path, tool_name + '.py')])
 
 
 def __get_catagories__(verbose=True, is_global=True):
@@ -82,6 +85,7 @@ def __get_catagories__(verbose=True, is_global=True):
         for f in files:
             print '\t', f
     return files
+
 
 def __show_tools__(verbose=True, is_global=True):
     config = __validate_config__()
@@ -116,6 +120,7 @@ def __show_catagories__(location):
     elif location == BOTH:
         __get_catagories__()
         __get_catagories__(is_global=False)
+
 
 def __list_tools__(location):
     config = __validate_config__()
