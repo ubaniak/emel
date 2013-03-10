@@ -96,19 +96,44 @@ def __show_tools__(verbose=True):
                 print '\t\t', f
 
 
-def __edit_tool__(argv):
+def __edit_tool__(pattern):
     config = __validate_config__()
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
 
     tools_path = create_path([data_dir, project, 'tools'])
+    regex = re.compile(pattern)
 
+    tools = []
+    append_tools = tools.append
     for root, d, files in os.walk(tools_path):
-        catagory = os.path.split(root)[-1]
-        if catagory != 'tools':
-            print root, files
+        files = [f for f in files if not f.startswith('__')]
+        for f in files:
+            if regex.search(f):
+                append_tools(os.path.join(root, f))
+    if not tools:
+        print 'Did not find any tools matching the pattern', pattern
+    else:
+        if len(tools) == 1:
+            __run__(tools)
+        else:
+            print 'Found (', len(tools), ') matching the pattern "', pattern, '"'
+            print 'Please choose:'
+            print 'a - all'
+            print 'q - cancel'
+            for i, j in enumerate(tools):
+                print i,'-', j
 
-
+            choice = ''
+            while choice not in ['a', 'q'] + [str(i) for i in range(len(tools))]:
+                choice = raw_input('>>> [ ')
+                if choice == 'q':
+                    print 'User aborted.'
+                    exit()
+                elif choice == 'a':
+                    __run__(tools)
+                elif choice in [str(i) for i in range(len(tools))]:
+                    __run__([tools[int(choice)]])
 
 
 def __show_catagories__():
@@ -130,7 +155,7 @@ def setup_arg_parser():
                     dest='list_tools', help='List all tools.')
     parser.add_argument('-c', '--show_catagories', action='store_true', 
                     dest='show_catagories', help='Gives a list of all catagories available.')
-    parser.add_argument('-e', '--edit', action='store', nargs='1',
+    parser.add_argument('-e', '--edit', action='store', 
                     dest='edit', help='edit a tool.')
     return parser
 
