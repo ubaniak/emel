@@ -8,6 +8,7 @@ from utils.path.pathhandler import emel_train_file_path, create_path, create_mar
 from utils.path.pathhandler import emel_project_tools_file_path, create_dir, emel_gather_data_file_path
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
+from emel.editor import __run__
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 from emel_globals import EMEL_UTILS_FILE
@@ -51,6 +52,9 @@ def __create_dg__():
         with open( create_path([dg_file, SETTING_FILE_NAME]), 'w' ) as fp:
             fp.write(SETTINGS_FILE)
         print 'Done.'
+        message = 'Would you like to edit the settings file?'
+        if yes_no_option(message):
+            __run__([create_path([dg_file, SETTING_FILE_NAME])])
     else:
         print 'Aborting'
 
@@ -121,6 +125,8 @@ def __show_downloaders__():
             print dl
 
     
+def __edit_dg__():
+    pass
 
 
 def setup_arg_parser():
@@ -137,6 +143,8 @@ def setup_arg_parser():
                     dest='show', help='prints the current data gather settings to stdout.')
     parser.add_argument('-d', '--downloaders', action='store_true',
                     dest='downloaders', help='Show all available downloaders.')
+    parser.add_argument('-e', '--edit', action='store_true',
+                    dest='edit', help='edit the gather-data settings file.')
     return parser
 
 
