@@ -1,13 +1,10 @@
 import sys
 import argparse
 import os
-from glob import glob
-import re
 
 from utils.settings.configobj import ConfigObj
 #from utils.settings.configmanager import ConfigManager
 from utils.path.pathhandler import create_dir, create_path, create_marker
-from utils.userinput.userinput import yes_no_option
 from emel_globals import EMEL_CONFIG_FILE, Data, Project, INIT_MARKER
 from emel.status import check_directory_status
 

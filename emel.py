@@ -2,7 +2,6 @@
 import sys
 import imp
 from glob import glob
-import re
 import os
 import inspect
 

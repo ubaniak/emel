@@ -4,7 +4,6 @@ import os
 
 from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
-from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 
