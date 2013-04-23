@@ -48,8 +48,6 @@ def __create_train__():
     message = ('[WARNING] This will destroy any existing train objects. Continue?')
     go = yes_no_option(message)
     if go:
-        config = __validate_config__()
-
         trainPath = emel_train_file_path()
         train_object = TRAIN_TEMPLATE.format(emel_project_tools_file_path())
 
@@ -104,6 +102,7 @@ def __run_train__():
     else:
         print '[ERROR] Could not create backup train folder.'
 
+
 def __list_order__():
     trainPath = emel_train_file_path()
     trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
@@ -130,8 +129,8 @@ def setup_arg_parser():
                     dest='new', help='Create a new train object.')
     parser.add_argument('-r', '--run', action='store_true',
                     dest='run', help='Run the current train object.')
-    parser.add_argument('-ls', '--list', action='store_true',
-                    dest='listOrder', help='Shows the order of the functions wich will be run.')
+    parser.add_argument('--list-order', action='store_true',
+                    dest='list_order', help='Shows the order of the functions wich will be run.')
     return parser
 
 
@@ -149,7 +148,7 @@ def main(argv):
         __create_train__()
     elif options.run:
         __run_train__()
-    elif options.listOrder:
+    elif options.list_order:
         __list_order__()
 
 if __name__=='__main__':
