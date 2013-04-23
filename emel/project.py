@@ -103,14 +103,13 @@ def setup_arg_parser():
 def main(argv):
     '''
     '''
-    if not check_directory_status(True):
-        exit()
     if not argv:
         check_project_status(True)
     else:
-
         parser = setup_arg_parser()
         options = parser.parse_args(argv)
+        if not check_directory_status(True):
+            exit()
 
         if options.new:
             __new_project__(options.new)
