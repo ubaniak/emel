@@ -1,9 +1,7 @@
 import os
 import sys
 import argparse
-import subprocess
 from utils.settings.configobj import ConfigObj
-from utils.userinput.userinput import yes_no_option
 from emel_globals import EMEL_CONFIG_FILE, Editor
 
 
