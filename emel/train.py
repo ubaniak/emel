@@ -8,6 +8,7 @@ from utils.path.pathhandler import emel_project_tools_file_path, create_dir
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
+from emel.editor import __run__
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 from emel_globals import BACKUP
 
@@ -118,6 +119,21 @@ def __list_order__():
         print function
 
 
+def __edit_train__():
+    trainPath = emel_train_file_path()
+    trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
+    trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
+
+    if not os.path.exists(trainOrderPath):
+        print '[ERROR] Could not find {}.'.format(TRAIN_ORDER_NAME)
+        print 'please run train -n first.'
+
+    if not os.path.exists(trainObjectPath):
+        print '[ERROR] Could not find {}.'.format(TRAIN_OBJECT_NAME)
+        print 'please run train -n first.'
+
+    __run__([trainOrderPath, trainObjectPath])
+
 
 def setup_arg_parser():
     '''
@@ -129,6 +145,8 @@ def setup_arg_parser():
                     dest='new', help='Create a new train object.')
     parser.add_argument('-r', '--run', action='store_true',
                     dest='run', help='Run the current train object.')
+    parser.add_argument('-e', '--edit', action='store_true',
+                    dest='edit', help='Open the train object/order in the chosen editor')
     parser.add_argument('--list-order', action='store_true',
                     dest='list_order', help='Shows the order of the functions wich will be run.')
     return parser
@@ -137,11 +155,11 @@ def setup_arg_parser():
 def main(argv):
     '''
     '''
+    parser = setup_arg_parser()
     if not check_directory_status(True):
         exit()
     if not check_project_status(True):
         exit()
-    parser = setup_arg_parser()
     options = parser.parse_args(argv)
 
     if options.new:
@@ -150,6 +168,8 @@ def main(argv):
         __run_train__()
     elif options.list_order:
         __list_order__()
+    elif options.edit:
+        __edit_train__()
 
 if __name__=='__main__':
     main(sys.argv[1:])
