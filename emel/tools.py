@@ -7,7 +7,7 @@ from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
-from emel.editor import __run__
+from emel.editor import __run_editor__
 from emel_globals import EMEL_CONFIG_FILE, EMEL_UTILS_FILE, Project, Data
 
 
@@ -58,7 +58,7 @@ def __create_tool__(catagory, tool_name):
     fp.close()
     print 'Created a new tool at {0}/{1}.py'.format(re.sub('\\\\', '/',new_cat_path), tool_name)
     if yes_no_option('Would you like to edit the tool now?'):
-        __run__([os.path.join(new_cat_path, tool_name + '.py')])
+        __run_editor__([os.path.join(new_cat_path, tool_name + '.py')])
 
 
 def __get_catagories__(verbose=True):
@@ -115,7 +115,7 @@ def __edit_tool__(pattern):
         print 'Did not find any tools matching the pattern', pattern
     else:
         if len(tools) == 1:
-            __run__(tools)
+            __run_editor__(tools)
         else:
             print 'Found (', len(tools), ') matching the pattern "', pattern, '"'
             print 'Please choose:'
@@ -131,9 +131,9 @@ def __edit_tool__(pattern):
                     print 'User aborted.'
                     exit()
                 elif choice == 'a':
-                    __run__(tools)
+                    __run_editor__(tools)
                 elif choice in [str(i) for i in range(len(tools))]:
-                    __run__([tools[int(choice)]])
+                    __run_editor__([tools[int(choice)]])
 
 
 def __show_catagories__():

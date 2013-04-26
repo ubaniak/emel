@@ -10,7 +10,7 @@ def __validate_config__():
     return config
 
 
-def __set__(editor):
+def __set_editor__(editor):
     print 'Setting default editor to', editor,
     config = __validate_config__()
     config[Editor.SECTION] = {}
@@ -19,7 +19,7 @@ def __set__(editor):
     config.write()
     print 'Done'
 
-def __run__(files):
+def __run_editor__(files):
     config = __validate_config__()
     if Editor.SECTION not in config or not config[Editor.SECTION] or not config[Editor.SECTION][Editor.CURRENT]:
         print '[WARNING] Editor is not set.'
@@ -29,14 +29,14 @@ def __run__(files):
     editor = config[Editor.SECTION][Editor.CURRENT]
     os.system(editor + ' ' + ' '.join(files))
 
-def __show__():
+def __show_editor__():
     config = __validate_config__()
     if Editor.SECTION not in config or not config[Editor.SECTION] or not config[Editor.SECTION][Editor.CURRENT]:
         print '[WARNING] Editor is not set.'
         print 'run emel.py editor -h for more info'
         exit()
 
-    print 'Current editor set to', config[Editor.SECTION][Editor.CURRENT]
+    print 'Current editor set to "', config[Editor.SECTION][Editor.CURRENT], '"'
 
 def setup_arg_parser():
     '''
@@ -60,11 +60,11 @@ def main(argv):
     options = parser.parse_args(argv)
 
     if options.set:
-        __set__(options.set)
+        __set_editor__(options.set)
     elif options.which:
-        __show__()
+        __show_editor__()
     elif options.run is not None:
-        __run__(options.run)
+        __run_editor__(options.run)
 
 if __name__=='__main__':
     main(sys.argv[1:])

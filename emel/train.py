@@ -8,7 +8,7 @@ from utils.path.pathhandler import emel_project_tools_file_path, create_dir
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
-from emel.editor import __run__
+from emel.editor import __run_editor__
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 from emel_globals import BACKUP
 
@@ -119,7 +119,7 @@ def __list_order__():
         print function
 
 
-def __edit_train__():
+def __edit_train__(show='both'):
     trainPath = emel_train_file_path()
     trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
     trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
@@ -132,7 +132,15 @@ def __edit_train__():
         print '[ERROR] Could not find {}.'.format(TRAIN_OBJECT_NAME)
         print 'please run train -n first.'
 
-    __run__([trainOrderPath, trainObjectPath])
+    to_open = []
+    if show == 'both':
+        to_open = [trainOrderPath, trainObjectPath]
+    if show == 'order':
+        to_open = [trainOrderPath]
+    if show == 'object':
+        to_open = [trainObjectPath]
+
+    __run_editor__(to_open)
 
 
 def setup_arg_parser():
