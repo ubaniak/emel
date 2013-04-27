@@ -72,8 +72,8 @@ def __run_train__():
 
     # Create a backup train folder
     folderName = datetime.now().strftime('Train_%Y%m%dT%H%M%S')
-    print 'Creating backup folder "{}" ...'.format(folderName),
     backupPath = create_dir(create_path([trainPath, folderName]))
+    print 'Creating backup folder "{}" ...'.format(backupPath),
     print 'Done.'
     
     if backupPath:
