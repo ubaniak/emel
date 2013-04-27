@@ -85,8 +85,6 @@ def __show_tools__(verbose=True):
     tools_path = create_path([data_dir, project, 'tools'])
 
     print "Catagories"
-    print '\ttools\n'
-    
     for root, d, files in os.walk(tools_path):
         catagory = os.path.split(root)[-1]
         if catagory != 'tools':
@@ -126,7 +124,7 @@ def __edit_tool__(pattern):
 
             choice = ''
             while choice not in ['a', 'q'] + [str(i) for i in range(len(tools))]:
-                choice = raw_input('>>> [ ')
+                choice = raw_input('[ ')
                 if choice == 'q':
                     print 'User aborted.'
                     exit()
