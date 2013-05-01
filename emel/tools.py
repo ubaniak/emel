@@ -96,7 +96,7 @@ def __list_tools__(verbose=True):
         catagory = os.path.split(root)[-1]
         if catagory != 'tools':
             print '\t', catagory
-            files = [ f for f in files if not f.startswith('__') ]
+            files = [ f for f in files if not (f.startswith('__') or f.endswith('.pyc')) ]
             for f in files:
                 print '\t\t', f
 
