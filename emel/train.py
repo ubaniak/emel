@@ -48,10 +48,6 @@ DEFAULT_TRAIN_LIST = ("description='Please give an explanation of your expirimen
 
 TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
 
-
-
-
-
 def __create_train__():
     message = ('[WARNING] This will destroy any existing train objects. Continue?')
     go = yes_no_option(message)
@@ -73,7 +69,54 @@ def __create_train__():
         print 'Aborting'
 
 
-def __run_train__():
+def __run_train__(which=None):
+    if not which or which == 'current':
+        __run_current_train__()
+    elif which == 'older':
+        __run_older_train__()
+
+
+def __run_older_train__():
+    trainPath = emel_train_file_path()
+
+    all_files = os.listdir(trainPath)
+    all_files = [f for f in all_files if f.startswith('Train_')]
+    if not all_files:
+        print 'No older train runs.'
+        exit()
+
+    print 'Select an option:'
+    print 'q - quit'
+    for i, j in enumerate(all_files):
+        trainOrderPath = os.path.join(trainPath, j, TRAIN_ORDER_NAME)
+        train_order = imp.load_source('train_order', trainOrderPath)
+        print '{} -'.format(i), os.path.join(trainPath, j)
+        print '\t', '"{}"'.format(train_order.description)
+
+    choice = ''
+    while choice not in ['q'] + [str(i) for i in range(len(all_files))]:
+        choice = raw_input('[')
+        if choice == 'q':
+            print 'User aborted'
+            exit()
+        elif choice in [str(i) for i in range(len(all_files))]:
+            choice = int(choice)
+            trainOrderPath = os.path.join(trainPath, all_files[choice], TRAIN_ORDER_NAME)
+            trainObjectPath = os.path.join(trainPath, all_files[choice], TRAIN_OBJECT_NAME)
+
+            train_order = imp.load_source('train_order', trainOrderPath)
+            train_object = imp.load_source('train', trainObjectPath)
+
+            train = train_object.Train()
+            for function in train_order.order:
+                print 'Running', function
+                start = datetime.now()
+                getattr(train, function)(**train_order.args[function])
+
+            exit()
+
+
+def __run_current_train__():
     config = __validate_config__()
     trainPath = emel_train_file_path()
 
@@ -110,11 +153,13 @@ def __run_train__():
     else:
         print '[ERROR] Could not create backup train folder.'
 
+
 def __edit_train__(which=None):
     if not which or which == 'current':
         __edit_current_train__()
     elif which == 'older':
         __edit_older_train__()
+
 
 def __edit_current_train__(show='both'):
     trainPath = emel_train_file_path()
@@ -218,12 +263,12 @@ def setup_arg_parser():
 
     parser.add_argument('-n', '--new', action='store_true',
                     dest='new', help='Create a new train object.')
-    parser.add_argument('-r', '--run', action='store_true',
-                    dest='run', help='Run the current train object.')
+    parser.add_argument('-r', '--run', action='store', default='donotuse', nargs='?',
+                    dest='run', help='Run the current train object. Can be either current or older')
     parser.add_argument('-e', '--edit', action='store', default='donotuse', nargs='?',
-                    dest='edit', help='Open the train object/order in the chosen editor')
+                    dest='edit', help='Open the train object/order. Can be either current or older')
     parser.add_argument('-ls', '--list', action='store', type=str, default='donotuse', nargs='?', 
-                    dest='list_', help='List either the current or older train fils.')
+                    dest='list_', help='List either the current or older train fils. Can be either curren or older')
     return parser
 
 
@@ -239,8 +284,8 @@ def main(argv):
 
     if options.new:
         __create_train__()
-    elif options.run:
-        __run_train__()
+    elif options.run != 'donotuse':
+        __run_train__(options.run)
     elif options.edit != 'donotuse':
         __edit_train__(options.edit)
     elif options.list_ != 'donotuse':
