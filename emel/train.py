@@ -4,7 +4,7 @@ import sys
 import argparse
 import subprocess
 from utils.path.pathhandler import emel_train_file_path, create_path, create_marker
-from utils.path.pathhandler import emel_project_tools_file_path, create_dir
+from utils.path.pathhandler import emel_tools_file_path, create_dir
 from utils.settings.configobj import ConfigObj
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
@@ -53,7 +53,7 @@ def __create_train__():
     go = yes_no_option(message)
     if go:
         trainPath = emel_train_file_path()
-        train_object = TRAIN_TEMPLATE.format(emel_project_tools_file_path())
+        train_object = TRAIN_TEMPLATE.format(emel_tools_file_path())
 
         print 'Creating default train order ...',
         with open(create_path([trainPath, TRAIN_ORDER_NAME]), 'w') as fp:

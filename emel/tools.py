@@ -5,6 +5,7 @@ import re
 
 from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
+from utils.path.pathhandler import emel_tools_file_path
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel.editor import __run_editor__
@@ -38,7 +39,7 @@ def __create_tool__(catagory, tool_name):
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
 
-    new_cat_path = create_path([data_dir, project, 'tools', catagory])
+    new_cat_path = create_path([emel_tools_file_path(), catagory])
 
     if catagory not in __get_catagories__(False):
         choice = yes_no_option('"{0}" is not a catagory. Would you like to create it ?'.format(catagory))
@@ -66,7 +67,7 @@ def __get_catagories__(verbose=True):
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
 
-    tools_path = create_path([data_dir, project, 'tools'])
+    tools_path = emel_tools_file_path()
 
     files = [ root for root, _, files in os.walk(tools_path) ]
     files = [ os.path.split(f)[-1] for f in files[1:] ]
@@ -82,7 +83,7 @@ def __list_tools__(verbose=True):
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
 
-    tools_path = create_path([data_dir, project, 'tools'])
+    tools_path = emel_tools_file_path()
 
     print "Catagories"
     for root, d, files in os.walk(tools_path):
@@ -99,7 +100,7 @@ def __edit_tool__(pattern):
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
 
-    tools_path = create_path([data_dir, project, 'tools'])
+    tools_path = emel_tools_file_path()
     regex = re.compile(pattern)
 
     tools = []

@@ -19,7 +19,6 @@ class Project:
     SECTION = 'project'
     CURRENT = 'current'
     MARKER = '__project__.emel'
-    FILES = [ 'raw', 'processed', 'train', 'tools' ]
 
 class Editor:
     SECTION = 'editor'

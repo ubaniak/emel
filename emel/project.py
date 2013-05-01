@@ -4,6 +4,8 @@ import os
 
 from utils.settings.configobj import ConfigObj
 from utils.path.pathhandler import create_dir, create_path, create_marker
+from utils.path.pathhandler import emel_tools_file_path, emel_raw_file_path
+from utils.path.pathhandler import emel_processed_file_path, emel_train_file_path
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
 TOOL_LIST = [ 'gather', 'process', 'analyzers' ]
@@ -51,6 +53,9 @@ def __new_project__(newProject):
     if newProject in __list_projects__():
         print '"', newProject, '" allready exists'
         exit()
+
+    config[Project.SECTION][Project.CURRENT] = newProject
+    config.write()
     
     dataDir = config[Data.SECTION][Data.CURRENT] 
     projectDir = create_path([dataDir, newProject])
@@ -58,18 +63,16 @@ def __new_project__(newProject):
     create_marker( projectDir, Project.MARKER )
     create_marker( projectDir, INIT_MARKER )
 
-    for fileType in Project.FILES:
-        newDir = create_path([projectDir, fileType])
-        create_dir( newDir, verbose=True )
-
-    config[Project.SECTION][Project.CURRENT] = newProject
-    config.write()
+    # Create all nessesary folders.
+    create_dir(emel_raw_file_path(), verbose=True)
+    create_dir(emel_processed_file_path(), verbose=True)
+    create_dir(emel_train_file_path(), verbose=True)
+    create_dir(emel_tools_file_path(), verbose=True)
 
     # Create nessesary tool dirs in the project/tools folder.
-
-    create_marker(create_path([projectDir, 'tools']), '__init__.py')
+    create_marker(emel_tools_file_path(), '__init__.py')
     for tool in TOOL_LIST:
-        new_dir = create_path([ projectDir, 'tools', tool ])
+        new_dir = create_path([ emel_tools_file_path(), tool ])
         create_dir(new_dir, verbose=True)
         create_marker(new_dir, '__init__.py')
  

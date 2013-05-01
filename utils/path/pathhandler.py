@@ -3,7 +3,6 @@ from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Data, Project
 
-from glob import glob
 import os
 
 
@@ -57,7 +56,7 @@ def create_marker(path, marker):
     with open( os.sep.join([path, marker]), 'w') as f: f.close()
 
 def __get_emel_file_path__(fileType):
-    allowed_types = ['raw','processed','train','tools']
+    allowed_types = ['raw','processed','train','tools_']
     if fileType.lower() not in allowed_types: raise TypeError( 'unknown file type {}. Only use {}'.format(fileType, ','.join(allowed_types)) )
     
     config = ConfigObj(EMEL_CONFIG_FILE)
@@ -79,8 +78,8 @@ def emel_processed_file_path():
 def emel_train_file_path():
     return __get_emel_file_path__('train')
 
-def emel_project_tools_file_path():
-    return __get_emel_file_path__('tools')
+def emel_tools_file_path():
+    return __get_emel_file_path__('tools_')
 
 def emel_project_path():
     config = ConfigObj(EMEL_CONFIG_FILE)
