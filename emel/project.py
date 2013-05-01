@@ -8,7 +8,6 @@ from utils.path.pathhandler import emel_tools_file_path, emel_raw_file_path
 from utils.path.pathhandler import emel_processed_file_path, emel_train_file_path
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
-TOOL_LIST = [ 'gather', 'process', 'analyzers' ]
 
 
 # TODO: delete projects.
@@ -71,10 +70,6 @@ def __new_project__(newProject):
 
     # Create nessesary tool dirs in the project/tools folder.
     create_marker(emel_tools_file_path(), '__init__.py')
-    for tool in TOOL_LIST:
-        new_dir = create_path([ emel_tools_file_path(), tool ])
-        create_dir(new_dir, verbose=True)
-        create_marker(new_dir, '__init__.py')
  
     print '"{0}" Successfully created.'.format(newProject)
 
