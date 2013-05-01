@@ -45,6 +45,16 @@ DEFAULT_TRAIN_LIST = ("order=['gather_data', 'pre_process', 'train']\n"
         "args={'gather_data':{},\n      'pre_process':{},\n      'train': {}}")
 
 
+def __list_older_train_dirs__():
+    trainPath = emel_train_file_path()
+
+    all_files = os.listdir(trainPath)
+    all_files = [f for f in all_files if f.startswith('Train_')]
+    print 'Older train files:'
+    for i in all_files:
+        print os.path.join(trainPath, i)
+
+
 def __create_train__():
     message = ('[WARNING] This will destroy any existing train objects. Continue?')
     go = yes_no_option(message)
@@ -157,6 +167,8 @@ def setup_arg_parser():
                     dest='edit', help='Open the train object/order in the chosen editor')
     parser.add_argument('--list-order', action='store_true',
                     dest='list_order', help='Shows the order of the functions wich will be run.')
+    parser.add_argument('--list-older-trains', action='store_true',
+                    dest='list_old', help='Lists all older train runs.')
     return parser
 
 
@@ -178,6 +190,8 @@ def main(argv):
         __list_order__()
     elif options.edit:
         __edit_train__()
+    elif options.list_old:
+        __list_older_train_dirs__()
 
 if __name__=='__main__':
     main(sys.argv[1:])
