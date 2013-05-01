@@ -27,7 +27,7 @@ TRAIN_TEMPLATE = """
 import sys
 # Add a path to project specific tools.
 sys.path.append('{}')
-import tools as project_tools
+import tools
 
 class Train(object):
     def gather_data(self):
