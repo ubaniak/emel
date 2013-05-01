@@ -41,20 +41,40 @@ class Train(object):
 TRAIN_ORDER_NAME = 'train_order.py'
 TRAIN_OBJECT_NAME = 'train.py'
 
-DEFAULT_TRAIN_LIST = ("order=['gather_data', 'pre_process', 'train']\n"
+DEFAULT_TRAIN_LIST = ("description='Please give an explanation of your expiriment here.'\n"
+        "order=['gather_data', 'pre_process', 'train']\n"
         "args={'gather_data':{},\n      'pre_process':{},\n      'train': {}}")
 
 
 TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
 
-def __list_older_train_dirs__():
+
+
+def __edit_older_trains__():
     trainPath = emel_train_file_path()
 
     all_files = os.listdir(trainPath)
     all_files = [f for f in all_files if f.startswith('Train_')]
-    print 'Older train files:'
-    for i in all_files:
-        print os.path.join(trainPath, i)
+
+    print 'Please choos a folder to edit.'
+    print '\tq - quit'
+    for i, j in enumerate(all_files):
+        print '\t', i, '-',j 
+
+    choice = ''
+    valid_choices = ['q'] + [str(i) for i in range(len(all_files))]
+    while choice not in valid_choices:
+        choice = raw_input('[ ')
+        if choice == 'q':
+            print 'User aborted'
+            exit()
+        elif choice in [str(i) for i in range(len(all_files))]:
+            trainOrder = os.path.join(trainPath, TRAIN_ORDER_NAME)
+            trainObject = os.path.join(trainPath, TRAIN_OBJECT_NAME)
+            
+            __run_editor__([trainOrder, trainObject])
+        else:
+            print 'Invalid choice.'
 
 
 def __create_train__():
@@ -94,10 +114,10 @@ def __run_train__():
         trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
 
         # copy over the train order and train object files.
-        print 'Backing up the train order ...'
+        print 'Backing up the train order ...',
         subprocess.call(['cp', trainOrderPath, backupPath])
         print 'Done.'
-        print 'Backing up train object ...'
+        print 'Backing up train object ...',
         subprocess.call(['cp', trainObjectPath, backupPath])
         print 'Done.'
 
@@ -116,43 +136,69 @@ def __run_train__():
         print '[ERROR] Could not create backup train folder.'
 
 
-def __list_order__():
-    trainPath = emel_train_file_path()
-    trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
-    trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
-
-    if not os.path.exists(trainOrderPath) or not os.path.exists(trainObjectPath):
-        print '[ERROR] the train object is not properly set up.'
-        print 'please run train -n'
-        exit()
-
-    train_order = imp.load_source('train_order', trainOrderPath)
-    for function in train_order.order:
-        print function
-
-
 def __edit_train__(show='both'):
     trainPath = emel_train_file_path()
-    trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
-    trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
+    trainOrder = create_path([trainPath, TRAIN_ORDER_NAME])
+    trainObject = create_path([trainPath, TRAIN_OBJECT_NAME])
 
-    if not os.path.exists(trainOrderPath):
+    if not os.path.exists(trainOrder):
         print '[ERROR] Could not find {}.'.format(TRAIN_ORDER_NAME)
         print 'please run train -n first.'
 
-    if not os.path.exists(trainObjectPath):
+    if not os.path.exists(trainObject):
         print '[ERROR] Could not find {}.'.format(TRAIN_OBJECT_NAME)
         print 'please run train -n first.'
 
     to_open = []
     if show == 'both':
-        to_open = [trainOrderPath, trainObjectPath]
+        to_open = [trainOrder, trainObject]
     if show == 'order':
-        to_open = [trainOrderPath]
+        to_open = [trainOrder]
     if show == 'object':
-        to_open = [trainObjectPath]
+        to_open = [trainObject]
 
     __run_editor__(to_open)
+
+
+def __ls_train__(which=None):
+    if not which or which == 'current':
+        __list_current_train__()
+    elif which == 'older':
+        __list_older_train__()
+
+
+def __list_current_train__():
+    trainPath = emel_train_file_path()
+    trainOrderPath  = create_path([trainPath, TRAIN_ORDER_NAME])
+
+    if not os.path.exists(trainOrderPath):
+        print '[ERROR] the train object is not properly set up.'
+        print 'please run train -n'
+        exit()
+
+    train_order = imp.load_source('train_order', trainOrderPath)
+    print '"{}"'.format(train_order.description)
+    for function in train_order.order:
+        print '\t', function
+
+
+def __list_older_train__():
+    trainPath = emel_train_file_path()
+
+    all_files = os.listdir(trainPath)
+    all_files = [f for f in all_files if f.startswith('Train_')]
+    if not all_files:
+        print 'No older train runs.'
+        exit()
+
+    print 'Older train files:'
+    for i in all_files:
+        trainOrderPath = os.path.join(trainPath, i, TRAIN_ORDER_NAME)
+        train_order = imp.load_source('train_order', trainOrderPath)
+        print os.path.join(trainPath, i)
+        print '\t', '"{}"'.format(train_order.description)
+        for function in train_order.order:
+            print '\t\t', function
 
 
 def setup_arg_parser():
@@ -167,10 +213,8 @@ def setup_arg_parser():
                     dest='run', help='Run the current train object.')
     parser.add_argument('-e', '--edit', action='store_true',
                     dest='edit', help='Open the train object/order in the chosen editor')
-    parser.add_argument('--list-order', action='store_true',
-                    dest='list_order', help='Shows the order of the functions wich will be run.')
-    parser.add_argument('--list-older-trains', action='store_true',
-                    dest='list_old', help='Lists all older train runs.')
+    parser.add_argument('-ls', '--list', action='store', type=str, default='donotuse', nargs='?', 
+                    dest='list_', help='List either the current or older train fils.')
     return parser
 
 
@@ -188,12 +232,11 @@ def main(argv):
         __create_train__()
     elif options.run:
         __run_train__()
-    elif options.list_order:
-        __list_order__()
     elif options.edit:
         __edit_train__()
-    elif options.list_old:
-        __list_older_train_dirs__()
+    elif options.list_ != 'donotuse':
+        __ls_train__(options.list_)
+
 
 if __name__=='__main__':
     main(sys.argv[1:])
