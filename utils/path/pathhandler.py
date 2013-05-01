@@ -83,6 +83,7 @@ def emel_tools_file_path():
 
 def emel_project_path():
     config = ConfigObj(EMEL_CONFIG_FILE)
-    dataDir = config[Data.SECTION][Data.CURRENT] 
+    currData = config[Data.SECTION][Data.CURRENT] 
+    dataDir = config[Data.SECTION][Data.ALL][currData]
     project = config[Project.SECTION][Project.CURRENT]
     return create_path([dataDir, project])
