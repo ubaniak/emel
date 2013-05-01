@@ -50,31 +50,6 @@ TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
 
 
 
-def __edit_older_trains__():
-    trainPath = emel_train_file_path()
-
-    all_files = os.listdir(trainPath)
-    all_files = [f for f in all_files if f.startswith('Train_')]
-
-    print 'Please choos a folder to edit.'
-    print '\tq - quit'
-    for i, j in enumerate(all_files):
-        print '\t', i, '-',j 
-
-    choice = ''
-    valid_choices = ['q'] + [str(i) for i in range(len(all_files))]
-    while choice not in valid_choices:
-        choice = raw_input('[ ')
-        if choice == 'q':
-            print 'User aborted'
-            exit()
-        elif choice in [str(i) for i in range(len(all_files))]:
-            trainOrder = os.path.join(trainPath, TRAIN_ORDER_NAME)
-            trainObject = os.path.join(trainPath, TRAIN_OBJECT_NAME)
-            
-            __run_editor__([trainOrder, trainObject])
-        else:
-            print 'Invalid choice.'
 
 
 def __create_train__():
@@ -135,8 +110,13 @@ def __run_train__():
     else:
         print '[ERROR] Could not create backup train folder.'
 
+def __edit_train__(which=None):
+    if not which or which == 'current':
+        __edit_current_train__()
+    elif which == 'older':
+        __edit_older_train__()
 
-def __edit_train__(show='both'):
+def __edit_current_train__(show='both'):
     trainPath = emel_train_file_path()
     trainOrder = create_path([trainPath, TRAIN_ORDER_NAME])
     trainObject = create_path([trainPath, TRAIN_OBJECT_NAME])
@@ -158,6 +138,35 @@ def __edit_train__(show='both'):
         to_open = [trainObject]
 
     __run_editor__(to_open)
+
+
+def __edit_older_train__():
+    trainPath = emel_train_file_path()
+
+    all_files = os.listdir(trainPath)
+    all_files = [f for f in all_files if f.startswith('Train_')]
+
+    print 'Please choos a folder to edit.'
+    print '\tq - quit'
+    for i, j in enumerate(all_files):
+        print '\t', i, '-',j 
+
+    choice = ''
+    valid_choices = ['q'] + [str(i) for i in range(len(all_files))]
+    while choice not in valid_choices:
+        choice = raw_input('[ ')
+        if choice == 'q':
+            print 'User aborted'
+            exit()
+        elif choice in [str(i) for i in range(len(all_files))]:
+            choice = int(choice)
+            trainOrder = os.path.join(trainPath, all_files[choice], TRAIN_ORDER_NAME)
+            trainObject = os.path.join(trainPath, all_files[choice], TRAIN_OBJECT_NAME)
+            
+            __run_editor__([trainOrder, trainObject])
+            exit()
+        else:
+            print 'Invalid choice.'
 
 
 def __ls_train__(which=None):
@@ -211,7 +220,7 @@ def setup_arg_parser():
                     dest='new', help='Create a new train object.')
     parser.add_argument('-r', '--run', action='store_true',
                     dest='run', help='Run the current train object.')
-    parser.add_argument('-e', '--edit', action='store_true',
+    parser.add_argument('-e', '--edit', action='store', default='donotuse', nargs='?',
                     dest='edit', help='Open the train object/order in the chosen editor')
     parser.add_argument('-ls', '--list', action='store', type=str, default='donotuse', nargs='?', 
                     dest='list_', help='List either the current or older train fils.')
@@ -232,8 +241,8 @@ def main(argv):
         __create_train__()
     elif options.run:
         __run_train__()
-    elif options.edit:
-        __edit_train__()
+    elif options.edit != 'donotuse':
+        __edit_train__(options.edit)
     elif options.list_ != 'donotuse':
         __ls_train__(options.list_)
 
