@@ -57,6 +57,12 @@ def __create_tool__(catagory, tool_name):
     fp = open( create_path([new_cat_path, tool_name+'.py']), 'w' )
     fp.write( TOOL_TEMPLATE.format(EMEL_UTILS_FILE, tool_name, re.sub('\\\\', '/', new_cat_path)) )
     fp.close()
+
+    # add tool to the __init__.py in the tools folder.
+    fp = open( create_path([emel_tools_file_path(), '__init__.py']), 'a')
+    fp.write( 'import {}.{}\n'.format(catagory, tool_name) )
+    fp.close()
+
     print 'Created a new tool at {0}/{1}.py'.format(re.sub('\\\\', '/',new_cat_path), tool_name)
     if yes_no_option('Would you like to edit the tool now?'):
         __run_editor__([os.path.join(new_cat_path, tool_name + '.py')])
