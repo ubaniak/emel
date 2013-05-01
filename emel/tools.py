@@ -77,7 +77,7 @@ def __get_catagories__(verbose=True):
     return files
 
 
-def __show_tools__(verbose=True):
+def __list_tools__(verbose=True):
     config = __validate_config__()
     data_dir = config[Data.SECTION][Data.ALL][config[Data.SECTION][Data.CURRENT]]
     project = config[Project.SECTION][Project.CURRENT]
@@ -134,13 +134,6 @@ def __edit_tool__(pattern):
                     __run_editor__([tools[int(choice)]])
 
 
-def __show_catagories__():
-    __get_catagories__()
-
-
-def __list_tools__():
-    __show_tools__()
-
 def setup_arg_parser():
     '''
     Create the argument parser
@@ -170,7 +163,7 @@ def main(argv):
     if options.new:
         __create_tool__(options.new[0], options.new[1])
     elif options.show_catagories:
-        __show_catagories__()
+        __get_catagories__()
     elif options.list_tools:
         __list_tools__()
     elif options.edit is not None:
