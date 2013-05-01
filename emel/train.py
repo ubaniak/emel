@@ -45,6 +45,8 @@ DEFAULT_TRAIN_LIST = ("order=['gather_data', 'pre_process', 'train']\n"
         "args={'gather_data':{},\n      'pre_process':{},\n      'train': {}}")
 
 
+TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
+
 def __list_older_train_dirs__():
     trainPath = emel_train_file_path()
 
@@ -81,7 +83,7 @@ def __run_train__():
     trainPath = emel_train_file_path()
 
     # Create a backup train folder
-    folderName = datetime.now().strftime('Train_%Y%m%dT%H%M%S')
+    folderName = datetime.now().strftime(TRAIN_BKUP_TEMPlATE)
     backupPath = create_dir(create_path([trainPath, folderName]))
     print 'Creating backup folder "{}" ...'.format(backupPath),
     print 'Done.'
