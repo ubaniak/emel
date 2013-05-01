@@ -11,6 +11,7 @@ from utils.path.pathhandler import emel_project_path
 from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel_globals import EMEL_CONFIG_FILE, Project, Data
+from emel.editor import __run_editor__
 
 # The default list of things emel needs.
 DEFULT = ['scikit-learn', 'numpy', 'scipy', 'pandas']
@@ -85,6 +86,7 @@ def __install_dependencies__(verbose=False):
     else:
         print 'Aborting.'
 
+
 def __list_dependencies__(verbose=False):
 
     can_run = True
@@ -121,6 +123,15 @@ def __create_dep_list__(check_first=True):
             f.write('# End emel defaults #')
 
 
+def __edit_dependency__():
+    depFile = create_path([emel_project_path(), DEPENDENCY_FILE])
+    if not os.path.exists(depFile):
+        print 'dependency file not created.'
+        print 'please run emel.py dependency -h for more help'
+        exit()
+    __run_editor__([depFile])
+
+
 def setup_arg_parser():
     '''
     Create the argument parser
@@ -131,6 +142,8 @@ def setup_arg_parser():
                     dest='new', help='Creates a new dependency file in the current project directory.')
     parser.add_argument('-ls', '--list', action='store_true', 
                     dest='listDeps', help='Checks the list of dependencies.')
+    parser.add_argument('-e', '--edit', action='store_true', 
+                    dest='edit', help='opens the dependency list in the given editor')
     parser.add_argument('--install', action='store_true', 
                     dest='install', help='Install the selected modules.')
     return parser
@@ -148,6 +161,8 @@ def main(argv):
         __create_dep_list__()
     elif options.install:
         __install_dependencies__()
+    elif options.edit:
+        __edit_dependency__()
 
 
 if __name__=='__main__':
