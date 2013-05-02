@@ -10,7 +10,7 @@ from utils.userinput.userinput import yes_no_option
 from emel.status import check_directory_status, check_project_status
 from emel.editor import __run_editor__
 from emel_globals import EMEL_CONFIG_FILE, Project, Data, INIT_MARKER
-from emel_globals import BACKUP
+from emel_globals import BACKUP, EMEL_UTILS_FILE
 
 from datetime import datetime
 
@@ -23,9 +23,12 @@ def __validate_config__():
     if Project.CURRENT not in config[Project.SECTION]: config[Project.SECTION][Project.CURRENT] = ''
     return config
 
-TRAIN_TEMPLATE = """
-import sys
+TRAIN_TEMPLATE = """import sys
 sys.path.append('{}')
+from utils.path.pathhandler import emel_raw_file_path, emel_processed_file_path
+from utils.path.pathhandler import emel_train_file_path, emel_project_path
+
+sys.path.append(emel_project_path())
 import tools_ as tools
 
 class Train(object):
@@ -47,12 +50,13 @@ DEFAULT_TRAIN_LIST = ("description='Please give an explanation of your expirimen
 
 TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
 
+
 def __create_train__():
     message = ('[WARNING] This will destroy any existing train objects. Continue?')
     go = yes_no_option(message)
     if go:
         trainPath = emel_train_file_path()
-        train_object = TRAIN_TEMPLATE.format(emel_project_path())
+        train_object = TRAIN_TEMPLATE.format(EMEL_UTILS_FILE)
 
         print 'Creating default train order ...',
         with open(create_path([trainPath, TRAIN_ORDER_NAME]), 'w') as fp:
