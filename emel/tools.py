@@ -119,6 +119,7 @@ def __edit_tool__(pattern):
     if not tools:
         print 'Did not find any tools matching the pattern', pattern
     else:
+        tools = [tool for tool in tools if tool.endswith('.py')]
         if len(tools) == 1:
             __run_editor__(tools)
         else:
