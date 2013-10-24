@@ -24,12 +24,12 @@ def __validate_config__():
     return config
 
 TRAIN_TEMPLATE = """import sys
-sys.path.append('{}')
+sys.path.append('{0}')
 from utils.path.pathhandler import emel_raw_file_path, emel_processed_file_path
 from utils.path.pathhandler import emel_train_file_path, emel_project_path
 
 sys.path.append(emel_project_path())
-import tools_ as tools
+{1}
 
 class Train(object):
     def gather_data(self):
@@ -50,13 +50,24 @@ DEFAULT_TRAIN_LIST = ("description='Please give an explanation of your expirimen
 
 TRAIN_BKUP_TEMPlATE = 'Train_%Y%m%d_%H%M%S'
 
+def __gather_tools__():
+    tools_path = emel_tools_file_path()
+    tools = []
+    for root, d, files in os.walk(tools_path):
+        if not d:
+            catagory = os.path.split(root)[-1]
+            all_files = [ f for f in files if not f.startswith("__") and not f.endswith(".pyc") ]
+            for f in all_files:
+                tools.append("import tools_.{0}.{1} as {1}".format(catagory, f.rstrip(".py")))
+    return "\n".join(tools)
 
 def __create_train__():
     message = ('[WARNING] This will destroy any existing train objects. Continue?')
     go = yes_no_option(message)
     if go:
         trainPath = emel_train_file_path()
-        train_object = TRAIN_TEMPLATE.format(EMEL_UTILS_FILE)
+        tools = __gather_tools__()
+        train_object = TRAIN_TEMPLATE.format(EMEL_UTILS_FILE, tools)
 
         print 'Creating default train order ...',
         with open(create_path([trainPath, TRAIN_ORDER_NAME]), 'w') as fp:
@@ -271,7 +282,7 @@ def setup_arg_parser():
     parser.add_argument('-e', '--edit', action='store', default='donotuse', nargs='?',
                     dest='edit', help='Open the train object/order. Can be either current or older')
     parser.add_argument('-ls', '--list', action='store', type=str, default='donotuse', nargs='?', 
-                    dest='list_', help='List either the current or older train fils. Can be either curren or older')
+                    dest='list_', help='List either the current or older train fils. Can be either current or older')
     return parser
 
 
