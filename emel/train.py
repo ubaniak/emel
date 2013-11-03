@@ -83,10 +83,15 @@ def __create_train__():
         print 'Aborting'
 
 
-def __run_train__(which=None):
-    if not which or which == 'current':
-        __run_current_train__()
-    elif which == 'older':
+def __run_train__(options=None):
+
+    current = 'current' in options or not options or len(options) == 1 and 'nobackup' in options
+    older = 'older' in options 
+    nobackup = 'nobackup' in options
+
+    if current:
+        __run_current_train__(nobackup)
+    elif older:
         __run_older_train__()
 
 
@@ -130,42 +135,60 @@ def __run_older_train__():
             exit()
 
 
-def __run_current_train__():
+def __run_current_train__(nobackup=False):
     config = __validate_config__()
     trainPath = emel_train_file_path()
 
-    # Create a backup train folder
-    folderName = datetime.now().strftime(TRAIN_BKUP_TEMPlATE)
-    backupPath = create_dir(create_path([trainPath, folderName]))
-    print 'Creating backup folder "{}" ...'.format(backupPath),
-    print 'Done.'
-    
-    if backupPath:
-        config[BACKUP] = backupPath
+    if nobackup:
+        print 'No backup flag set.'
+    else:
+        # Create a backup train folder
+        folderName = datetime.now().strftime(TRAIN_BKUP_TEMPlATE)
+        backupPath = create_dir(create_path([trainPath, folderName]))
+        print 'Creating backup folder "{}" ...'.format(backupPath),
+        print 'Done.'
+
+    if nobackup:
         trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
         trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
-
-        # copy over the train order and train object files.
-        print 'Backing up the train order ...',
-        subprocess.call(['cp', trainOrderPath, backupPath])
-        print 'Done.'
-        print 'Backing up train object ...',
-        subprocess.call(['cp', trainObjectPath, backupPath])
-        print 'Done.'
 
         train_order = imp.load_source('train_order', trainOrderPath)
         train_object = imp.load_source('train', trainObjectPath)
 
         train = train_object.Train()
-        f = open(create_path([backupPath, 'time.txt']), 'w')
         for function in train_order.order:
             print 'Running', function
             start = datetime.now()
             getattr(train, function)(**train_order.args[function])
-            f.write('Function "{}" (Took: {})\n'.format(function, datetime.now() - start))
-        f.close()
-    else:
-        print '[ERROR] Could not create backup train folder.'
+
+    
+    if not nobackup:
+        if backupPath:
+            config[BACKUP] = backupPath
+            trainOrderPath = create_path([trainPath, TRAIN_ORDER_NAME])
+            trainObjectPath = create_path([trainPath, TRAIN_OBJECT_NAME])
+
+            # copy over the train order and train object files.
+            print 'Backing up the train order ...',
+            subprocess.call(['cp', trainOrderPath, backupPath])
+            print 'Done.'
+            print 'Backing up train object ...',
+            subprocess.call(['cp', trainObjectPath, backupPath])
+            print 'Done.'
+
+            train_order = imp.load_source('train_order', trainOrderPath)
+            train_object = imp.load_source('train', trainObjectPath)
+
+            train = train_object.Train()
+            f = open(create_path([backupPath, 'time.txt']), 'w')
+            for function in train_order.order:
+                print 'Running', function
+                start = datetime.now()
+                getattr(train, function)(**train_order.args[function])
+                f.write('Function "{}" (Took: {})\n'.format(function, datetime.now() - start))
+            f.close()
+        else:
+            print '[ERROR] Could not create backup train folder.'
 
 
 def __edit_train__(which=None):
@@ -277,8 +300,8 @@ def setup_arg_parser():
 
     parser.add_argument('-n', '--new', action='store_true',
                     dest='new', help='Create a new train object.')
-    parser.add_argument('-r', '--run', action='store', default='donotuse', nargs='?',
-                    dest='run', help='Run the current train object. Can be either current or older')
+    parser.add_argument('-r', '--run', action='store', default='donotuse', nargs='*',
+                    dest='run', help='Run the train object. Can use the older flag to run older trains and nobackup to skip backing up data.')
     parser.add_argument('-e', '--edit', action='store', default='donotuse', nargs='?',
                     dest='edit', help='Open the train object/order. Can be either current or older')
     parser.add_argument('-ls', '--list', action='store', type=str, default='donotuse', nargs='?', 
